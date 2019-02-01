@@ -97,6 +97,46 @@ bool TrimeshFace::intersectLocal(ray& r, isect& i) const
 	//
 	// FIXME: Add ray-trimesh intersection
 
+	glm::dvec3 a_coords = parent->vertices[ids[0]];
+	glm::dvec3 b_coords = parent->vertices[ids[1]];
+	glm::dvec3 c_coords = parent->vertices[ids[2]];
+	
+	glm::dvec3 p = r.getPosition();
+	glm::dvec3 d = r.getDirection();
+
+	double dval = glm::dot(normal, a_coords);
+
+	// The vector is parallel to the plane it doesn't intersect the plane.
+	if(glm::dot(normal, d) == 0) {
+		return false;
+	}
+
+	double t = (dval - glm::dot(normal, p)) / glm::dot(normal, d);
+	glm::dvec3 q = r.at(t);
+
+	// Figure out if the ray is inside the triangle
+
+	bool cond1 = glm::dot(glm::cross(b_coords - a_coords, q-a_coords), normal) >= 0;
+	bool cond2 = glm::dot(glm::cross(c_coords - b_coords, q-b_coords), normal) >= 0;
+	bool cond3 = glm::dot(glm::cross(a_coords - c_coords, q-c_coords), normal) >= 0;
+
+	if(cond1 && cond2 && cond3) {
+		// Compute areas
+		double alpha = glm::dot(glm::cross(c_coords - b_coords, q - b_coords), normal) / 
+							glm::dot(glm::cross(b_coords - a_coords, c_coords - a_coords), normal);
+		double beta = glm::dot(glm::cross(a_coords - c_coords, q - c_coords), normal) / 
+							glm::dot(glm::cross(b_coords - a_coords, c_coords - a_coords), normal);
+		double gamma = glm::dot(glm::cross(b_coords - a_coords, q - a_coords), normal) / 
+							glm::dot(glm::cross(b_coords - a_coords, c_coords - a_coords), normal);
+
+		i.setT(t);
+		i.setObject(this);
+		i.setMaterial(this->getMaterial());
+		i.setBary(alpha, beta, gamma);
+
+		return true;
+	}
+
 	return false;
 }
 
