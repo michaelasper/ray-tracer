@@ -45,7 +45,33 @@ glm::dvec3 Material::shade(Scene* scene, const ray& r, const isect& i) const
 	// 		.
 	// 		.
 	// }
-	return kd(i);
+
+	double alpha = shininess(i);
+	
+	glm::dvec3 normal = glm::normalize(i.getN());
+	glm::dvec3 v = glm::normalize(scene->getCamera().getEye());
+	glm::dvec3 Ia = scene->ambient();
+	glm::dvec3 intensity = ka(i) * Ia;
+
+	for(const auto& pLight : scene->getAllLights()) {
+		glm::dvec3 Iin = pLight->getColor();
+		glm::dvec3 l = glm::normalize(pLight->getDirection(glm::dvec3(r.at(i.getT()))));	
+		
+		if(dynamic_cast<PointLight*>(pLight.get())) {
+			//std::cout << "POINT" << endl;
+		}
+
+		glm::dvec3 reflect = glm::normalize(2*glm::dot(l, normal)*normal - l);
+
+		// Phong Model
+		intensity += (Iin * ( kd(i) * max(glm::dot(l, normal), 0.0) 
+						    + ks(i) * pow(max(glm::dot(v, reflect), 0.0), alpha)));
+		
+		// Light attenuation
+		intensity *= min(1.0, pLight->distanceAttenuation(r.at(i.getT())) );
+    	
+	}
+	return intensity;
 }
 
 TextureMap::TextureMap(string filename)
