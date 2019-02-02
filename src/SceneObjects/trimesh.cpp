@@ -130,9 +130,11 @@ bool TrimeshFace::intersectLocal(ray& r, isect& i) const
 							glm::dot(glm::cross(b_coords - a_coords, c_coords - a_coords), normal);
 
 		i.setT(t);
+		i.setN(glm::normalize(normal));
 		i.setObject(this);
 		i.setMaterial(this->getMaterial());
 		i.setBary(alpha, beta, gamma);
+		i.setUVCoordinates(glm::dvec2(alpha, beta));
 
 		return true;
 	}
