@@ -49,9 +49,12 @@ glm::dvec3 Material::shade(Scene* scene, const ray& r, const isect& i) const
 	double alpha = shininess(i);
 	
 	glm::dvec3 normal = glm::normalize(i.getN());
-	glm::dvec3 v = glm::normalize(scene->getCamera().getEye());
+	glm::dvec3 v = scene->getCamera().getEye();
+	if(v != glm::dvec3(0.0,0.0,0.0))
+		v = glm::normalize(v);
+
 	glm::dvec3 Ia = scene->ambient();
-	glm::dvec3 intensity = ka(i) * Ia;
+	glm::dvec3 intensity = ke(i) + ka(i) * Ia;
 
 	for(const auto& pLight : scene->getAllLights()) {
 		glm::dvec3 Iin = pLight->getColor();
@@ -62,14 +65,10 @@ glm::dvec3 Material::shade(Scene* scene, const ray& r, const isect& i) const
 		}
 
 		glm::dvec3 reflect = glm::normalize(2*glm::dot(l, normal)*normal - l);
-
 		// Phong Model
 		intensity += (Iin * ( kd(i) * max(glm::dot(l, normal), 0.0) 
-						    + ks(i) * pow(max(glm::dot(v, reflect), 0.0), alpha)));
-		
-		// Light attenuation
-		intensity *= min(1.0, pLight->distanceAttenuation(r.at(i.getT())) );
-    	
+						    + ks(i) * pow(max(glm::dot(v, reflect), 0.0), alpha)))
+							* min(1.0, pLight->distanceAttenuation(r.at(i.getT())));
 	}
 	return intensity;
 }
