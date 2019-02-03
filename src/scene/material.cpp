@@ -68,8 +68,11 @@ glm::dvec3 Material::shade(Scene* scene, const ray& r, const isect& i) const
 		// Phong Model
 		intensity += (Iin * ( kd(i) * max(glm::dot(l, normal), 0.0) 
 						    + ks(i) * pow(max(glm::dot(v, reflect), 0.0), alpha)))
-							* min(1.0, pLight->distanceAttenuation(r.at(i.getT())));
+							* max(1.0, pLight->distanceAttenuation(r.at(i.getT())));
+
+		std::cout << pLight->distanceAttenuation(r.at(i.getT())) << endl;
 	}
+	
 	return intensity;
 }
 
