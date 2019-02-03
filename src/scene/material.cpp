@@ -49,7 +49,7 @@ glm::dvec3 Material::shade(Scene* scene, const ray& r, const isect& i) const
 	double alpha = shininess(i);
 	
 	glm::dvec3 normal = glm::normalize(i.getN());
-	glm::dvec3 v = scene->getCamera().getEye();
+	glm::dvec3 v = -r.getDirection();
 	if(v != glm::dvec3(0.0,0.0,0.0))
 		v = glm::normalize(v);
 
@@ -58,19 +58,15 @@ glm::dvec3 Material::shade(Scene* scene, const ray& r, const isect& i) const
 
 	for(const auto& pLight : scene->getAllLights()) {
 		glm::dvec3 Iin = pLight->getColor();
-		glm::dvec3 l = glm::normalize(pLight->getDirection(glm::dvec3(r.at(i.getT()))));	
-		
-		if(dynamic_cast<PointLight*>(pLight.get())) {
-			//std::cout << "POINT" << endl;
-		}
 
+		// Distance Attenuation
+		Iin *= min(1.0, pLight->distanceAttenuation(r.at(i.getT())));
+
+		glm::dvec3 l = glm::normalize(pLight->getDirection(r.at(i.getT())));
 		glm::dvec3 reflect = glm::normalize(2*glm::dot(l, normal)*normal - l);
+		
 		// Phong Model
-		intensity += (Iin * ( kd(i) * max(glm::dot(l, normal), 0.0) 
-						    + ks(i) * pow(max(glm::dot(v, reflect), 0.0), alpha)))
-							* max(1.0, pLight->distanceAttenuation(r.at(i.getT())));
-
-		std::cout << pLight->distanceAttenuation(r.at(i.getT())) << endl;
+		intensity += Iin * (kd(i) * max(glm::dot(l, normal), 0.0) + ks(i) * pow(max(glm::dot(v, reflect), 0.0), alpha));
 	}
 	
 	return intensity;
