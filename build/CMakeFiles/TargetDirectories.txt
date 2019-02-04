@@ -1,5 +1,0 @@
-/Users/michaelasper/Source/Graphics/Ray Tracer/ray-tracer/build/CMakeFiles/rebuild_cache.dir
-/Users/michaelasper/Source/Graphics/Ray Tracer/ray-tracer/build/CMakeFiles/edit_cache.dir
-/Users/michaelasper/Source/Graphics/Ray Tracer/ray-tracer/build/src/CMakeFiles/rebuild_cache.dir
-/Users/michaelasper/Source/Graphics/Ray Tracer/ray-tracer/build/src/CMakeFiles/edit_cache.dir
-/Users/michaelasper/Source/Graphics/Ray Tracer/ray-tracer/build/src/CMakeFiles/ray.dir
