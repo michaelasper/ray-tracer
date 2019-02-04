@@ -16,10 +16,8 @@ glm::dvec3 DirectionalLight::shadowAttenuation(const ray& r,
                                                const glm::dvec3& p) const {
     // YOUR CODE HERE:
     // You should implement shadow-handling code here.
-    glm::dvec3 l = glm::normalize(getDirection(p));
-    ray shadow(p + l * 1e-4, l, r.getAtten(), ray::SHADOW);
-
     isect i;
+    ray shadow(r);
     if (this->scene->intersect(shadow, i)) {
         return glm::dvec3(0, 0, 0);
     } else {
@@ -55,11 +53,14 @@ glm::dvec3 PointLight::shadowAttenuation(const ray& r,
     // YOUR CODE HERE:
     // You should implement shadow-handling code here.
     // auto d =
-    glm::dvec3 l = glm::normalize(getDirection(p));
-    ray shadow(p + l * 1e-4, l, r.getAtten(), ray::SHADOW);
+    // glm::dvec3 l = glm::normalize(getDirection(p));
+    // ray shadow(p + l * 1e-4, l, r.getAtten(), ray::SHADOW);
 
     isect i;
-    if (this->scene->intersect(shadow, i)) {
+    ray shadow(r);
+    double diff = glm::length(p - position);
+    // have to check if t < t_light
+    if (this->scene->intersect(shadow, i) && i.getT() < diff) {
         return glm::dvec3(0, 0, 0);
     } else {
         return glm::dvec3(1, 1, 1);
