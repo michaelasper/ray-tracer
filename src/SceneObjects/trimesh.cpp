@@ -73,6 +73,16 @@ bool TrimeshFace::intersect(ray& r, isect& i) const {
 // Intersect ray r with the triangle abc.  If it hits returns true,
 // and put the parameter in t and the barycentric coordinates of the
 // intersection in u (alpha) and v (beta).
+
+bool check_cond(glm::dvec3 a, glm::dvec3 b, glm::dvec3 c, glm::dvec3 q,
+                glm::dvec3 normal) {
+    bool cond1 = glm::dot(glm::cross(b - a, q - a), normal) >= 0;
+    bool cond2 = glm::dot(glm::cross(c - b, q - b), normal) >= 0;
+    bool cond3 = glm::dot(glm::cross(a - c, q - c), normal) >= 0;
+
+    return cond1 && cond2 && cond3;
+}
+
 bool TrimeshFace::intersectLocal(ray& r, isect& i) const {
     // YOUR CODE HERE
     //
@@ -85,26 +95,20 @@ bool TrimeshFace::intersectLocal(ray& r, isect& i) const {
     glm::dvec3 p = r.getPosition();
     glm::dvec3 d = r.getDirection();
 
-    double dval = glm::dot(normal, a_coords);
-
     // The vector is parallel to the plane it doesn't intersect the plane.
     if (glm::dot(normal, d) == 0) {
         return false;
     }
 
+    double dval = glm::dot(normal, a_coords);
+
     double t = (dval - glm::dot(normal, p)) / glm::dot(normal, d);
+    if (t <= RAY_EPSILON) return false;
     glm::dvec3 q = r.at(t);
 
     // Figure out if the ray is inside the triangle
 
-    bool cond1 =
-        glm::dot(glm::cross(b_coords - a_coords, q - a_coords), normal) >= 0;
-    bool cond2 =
-        glm::dot(glm::cross(c_coords - b_coords, q - b_coords), normal) >= 0;
-    bool cond3 =
-        glm::dot(glm::cross(a_coords - c_coords, q - c_coords), normal) >= 0;
-
-    if (cond1 && cond2 && cond3) {
+    if (check_cond(a_coords, b_coords, c_coords, q, normal)) {
         // Compute areas
         double alpha =
             glm::dot(glm::cross(c_coords - b_coords, q - b_coords), normal) /
@@ -119,20 +123,25 @@ bool TrimeshFace::intersectLocal(ray& r, isect& i) const {
             glm::dot(glm::cross(b_coords - a_coords, c_coords - a_coords),
                      normal);
 
-        // i.setN(glm::normalize(normal));
-
         if (!parent->vertNorms) parent->generateNormals();
 
-        auto normals = parent->normals;
-
-        auto interp = alpha * normals[(*this)[0]] + beta * normals[(*this)[1]] +
-                      gamma * normals[(*this)[2]];
+        auto interp = glm::normalize(alpha * parent->normals[ids[0]] +
+                                     beta * parent->normals[ids[1]] +
+                                     gamma * parent->normals[ids[2]]);
 
         i.setT(t);
+        if (parent->materials.size() > 0) {
+            Material accumulate = (alpha * *(parent->materials[ids[0]]));
+            accumulate += (beta * *(parent->materials[ids[1]]));
+            accumulate += (gamma * *(parent->materials[ids[2]]));
+            i.setMaterial(accumulate);
+        } else {
+            i.setMaterial(this->getMaterial());
+        }
 
         i.setN(glm::normalize(interp));
+
         i.setObject(this);
-        i.setMaterial(this->getMaterial());
         i.setBary(alpha, beta, gamma);
         i.setUVCoordinates(glm::dvec2(alpha, beta));
         return true;
