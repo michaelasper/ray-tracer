@@ -43,29 +43,27 @@ Material::~Material() {}
 // 		.
 // }
 glm::dvec3 Material::shade(Scene* scene, const ray& r, const isect& i) const {
-    double alpha = shininess(i);
-
-    glm::dvec3 normal = glm::normalize(i.getN());
+    glm::dvec3 normal = i.getN();
     glm::dvec3 v = -r.getDirection();
     if (v != glm::dvec3(0.0, 0.0, 0.0)) v = glm::normalize(v);
-    glm::dvec3 intensity = ke(i) + ka(i) * scene->ambient();
+    glm::dvec3 Ia = scene->ambient();
+    glm::dvec3 intensity = ke(i) + ka(i) * Ia;
+    glm::dvec3 pos = r.at(i);
 
     for (const auto& pLight : scene->getAllLights()) {
-        glm::dvec3 l = glm::normalize(pLight->getDirection(r.at(i.getT())));
-        glm::dvec3 reflect =
-            glm::normalize(2 * glm::dot(l, normal) * normal - l);
+        glm::dvec3 l = pLight->getDirection(pos);
+        glm::dvec3 reflect = 2 * glm::dot(l, normal) * normal - l;
 
-        // ray shadow(r.at(i.getT()) + l * 1e-4, l, r.getAtten(), ray::SHADOW);
-
-        glm::dvec3 atten =
-            pLight->getColor() *
-            min(1.0, pLight->distanceAttenuation(r.at(i.getT()))) *
-            pLight->shadowAttenuation(r, r.at(i.getT()));
+        glm::dvec3 atten = pLight->getColor();
+        atten *= min(1.0, pLight->distanceAttenuation(r.at(i.getT())));
+        ray shadow(pos + 1e-4 * normal, l, glm::dvec3(0.0, 0.0, 0.0),
+                   ray::SHADOW);
+        atten *= pLight->shadowAttenuation(shadow, pos + 1e-4 * normal);
 
         // Phong Model
         intensity +=
             atten * (kd(i) * max(glm::dot(l, normal), 0.0) +
-                     ks(i) * pow(max(glm::dot(v, reflect), 0.0), alpha));
+                     ks(i) * pow(max(glm::dot(v, reflect), 0.0), shininess(i)));
     }
 
     return intensity;
