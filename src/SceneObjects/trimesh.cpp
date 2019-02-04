@@ -130,14 +130,7 @@ bool TrimeshFace::intersectLocal(ray& r, isect& i) const {
                                      gamma * parent->normals[ids[2]]);
 
         i.setT(t);
-        if (parent->materials.size() > 0) {
-            Material accumulate = (alpha * *(parent->materials[ids[0]]));
-            accumulate += (beta * *(parent->materials[ids[1]]));
-            accumulate += (gamma * *(parent->materials[ids[2]]));
-            i.setMaterial(accumulate);
-        } else {
-            i.setMaterial(this->getMaterial());
-        }
+        i.setMaterial(this->getMaterial());
 
         i.setN(glm::normalize(interp));
 
