@@ -106,6 +106,22 @@ glm::dvec3 RayTracer::traceRay(ray& r, const glm::dvec3& thresh, int depth,
             colorC += traceRay(reflect, thresh, new_depth, t) * m.kr(i);
         }
 
+        if (depth > 0 && m.Trans()) {
+            auto N = i.getN();
+            auto I = r.getDirection();
+            double c1 = glm::dot(-I, N);
+            double theta1 = glm::acos(c1);
+            double c2 = glm::sqrt(1 - glm::pow(m.index(i), 2) *
+                                          (1 - glm::pow(theta1, 2)));
+            // auto T = m.index(i) * (I + c1 * N) - N * c2;
+            auto T = glm::refract(r.getDirection(), i.getN(), m.index(i));
+
+            ray refrac(r.at(i), T, glm::dvec3(1.0, 1.0, 1.0), ray::REFRACTION);
+            auto new_depth = depth - 1;
+
+            colorC += traceRay(refrac, thresh, new_depth, t) * m.kt(i);
+        }
+
     } else {
         // No intersection.  This ray travels to infinity, so we color
         // it according to the background color, which in this (simple) case
@@ -248,7 +264,6 @@ int RayTracer::aaImage() {
     // TIP: samples and aaThresh have been synchronized with TraceUI by
     //      RayTracer::traceSetup() function
 
-    
     return 0;
 }
 

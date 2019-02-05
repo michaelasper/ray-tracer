@@ -38,7 +38,7 @@ glm::dvec3 DirectionalLight::getDirection(const glm::dvec3& P) const {
 
 // return 1.0;
 double PointLight::distanceAttenuation(const glm::dvec3& P) const {
-    double d = sqrt(glm::dot(position - P, position - P));
+    double d = glm::sqrt(glm::dot(position - P, position - P));
     return 1.0 / (constantTerm + linearTerm * d + quadraticTerm * d * d);
 }
 
