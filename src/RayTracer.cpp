@@ -107,31 +107,26 @@ glm::dvec3 RayTracer::traceRay(ray& r, const glm::dvec3& thresh, int depth,
         }
 
         // Refractions
+        // https://www.scratchapixel.com/lessons/3d-basic-rendering/introduction-to-shading/reflection-refraction-fresnel
         if (depth > 0 && m.Trans()) {
             auto N = i.getN();
-            auto I = r.getDirection();
-            double c1 = glm::dot(I, N);
 
             double n1 = 1;
             double n2 = m.index(i);
 
-            if (c1 < 0) {
-                c1 = -c1;
-            } else {
-                N = -N;
+            if (r.type() == ray::REFRACTION) {
                 std::swap(n1, n2);
+                N = -N;
             }
 
-            double theta1 = glm::acos(c1);
-            double c2 = glm::sqrt(1 - glm::pow(m.index(i), 2) *
-                                          (1 - glm::pow(theta1, 2)));
-            // auto T = m.index(i) * (I + c1 * N) - N * c2;
-            auto T = glm::refract(r.getDirection(), i.getN(), n1 / n2);
+            auto T = glm::refract(r.getDirection(), N, n1 / n2);
+            auto new_depth = depth - 1;
 
+            // tir
             if (T.length() != 0) {
-                ray refrac(r.at(i), T, r.getAtten(), ray::REFRACTION);
-                auto new_depth = depth - 1;
-
+                ray refrac(r.at(i), T, r.getAtten(),
+                           (r.type() == ray::REFRACTION ? ray::VISIBILITY
+                                                        : ray::REFRACTION));
                 colorC += traceRay(refrac, thresh, new_depth, t) * m.kt(i);
             }
         }
