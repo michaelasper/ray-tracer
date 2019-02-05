@@ -106,20 +106,34 @@ glm::dvec3 RayTracer::traceRay(ray& r, const glm::dvec3& thresh, int depth,
             colorC += traceRay(reflect, thresh, new_depth, t) * m.kr(i);
         }
 
+        // Refractions
         if (depth > 0 && m.Trans()) {
             auto N = i.getN();
             auto I = r.getDirection();
-            double c1 = glm::dot(-I, N);
+            double c1 = glm::dot(I, N);
+
+            double n1 = 1;
+            double n2 = m.index(i);
+
+            if (c1 < 0) {
+                c1 = -c1;
+            } else {
+                N = -N;
+                std::swap(n1, n2);
+            }
+
             double theta1 = glm::acos(c1);
             double c2 = glm::sqrt(1 - glm::pow(m.index(i), 2) *
                                           (1 - glm::pow(theta1, 2)));
             // auto T = m.index(i) * (I + c1 * N) - N * c2;
-            auto T = glm::refract(r.getDirection(), i.getN(), m.index(i));
+            auto T = glm::refract(r.getDirection(), i.getN(), n1 / n2);
 
-            ray refrac(r.at(i), T, glm::dvec3(1.0, 1.0, 1.0), ray::REFRACTION);
-            auto new_depth = depth - 1;
+            if (T.length() != 0) {
+                ray refrac(r.at(i), T, r.getAtten(), ray::REFRACTION);
+                auto new_depth = depth - 1;
 
-            colorC += traceRay(refrac, thresh, new_depth, t) * m.kt(i);
+                colorC += traceRay(refrac, thresh, new_depth, t) * m.kt(i);
+            }
         }
 
     } else {

@@ -18,11 +18,28 @@ glm::dvec3 DirectionalLight::shadowAttenuation(const ray& r,
     // You should implement shadow-handling code here.
     isect i;
     ray shadow(r);
-    if (this->scene->intersect(shadow, i)) {
-        return glm::dvec3(0, 0, 0);
-    } else {
-        return glm::dvec3(1, 1, 1);
+    // have to check if t < t_light
+    auto total = glm::dvec3(1.0, 1.0, 1.0);
+    auto pos = glm::dvec3(0.0, 0.0, 0.0);
+    // std::cerr << "EEEE" << std::endl;
+    // std::cout << "CCCC" << std::endl;
+    while (this->scene->intersect(shadow, i)) {
+        if (!i.getMaterial().Trans()) {
+            return glm::dvec3(0.0, 0.0, 0.0);
+        } else {
+            if (glm::dot(shadow.getDirection(), i.getN()) > 0) {
+                for (int j = 0; j < 3; j++) {
+                    total[j] *= pow(i.getMaterial().kt(i)[j], i.getT());
+                }
+                pos = i.getN() * .001;
+            } else {
+                pos = -i.getN() * .001;
+            }
+            shadow.setPosition(shadow.at(i) + pos);
+        }
     }
+    // std::cerr << total << std::endl;
+    return total;
 }
 
 glm::dvec3 DirectionalLight::getColor() const { return color; }
@@ -50,21 +67,26 @@ glm::dvec3 PointLight::getDirection(const glm::dvec3& P) const {
 
 glm::dvec3 PointLight::shadowAttenuation(const ray& r,
                                          const glm::dvec3& p) const {
-    // YOUR CODE HERE:
-    // You should implement shadow-handling code here.
-    // auto d =
-    // glm::dvec3 l = glm::normalize(getDirection(p));
-    // ray shadow(p + l * 1e-4, l, r.getAtten(), ray::SHADOW);
-
     isect i;
     ray shadow(r);
     double diff = glm::length(p - position);
     // have to check if t < t_light
-    if (this->scene->intersect(shadow, i) && i.getT() < diff) {
-        return glm::dvec3(0, 0, 0);
-    } else {
-        return glm::dvec3(1, 1, 1);
+    auto total = glm::dvec3(1.0, 1.0, 1.0);
+    auto pos = glm::dvec3(0.0, 0.0, 0.0);
+    while (this->scene->intersect(shadow, i)) {
+        if (i.getT() < diff) return total;
+        if (!i.getMaterial().Trans()) {
+            return glm::dvec3(0.0, 0.0, 0.0);
+        } else {
+            for (int j = 0; j < 3; j++) {
+                total[j] *= glm::pow(i.getMaterial().kt(i)[j], i.getT());
+            }
+            pos = i.getN() * .000001;
+            shadow.setPosition(shadow.at(i) + pos);
+        }
     }
+
+    return total;
 }
 
 #define VERBOSE 0
