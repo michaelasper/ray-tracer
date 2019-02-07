@@ -123,17 +123,26 @@ bool TrimeshFace::intersectLocal(ray& r, isect& i) const {
             glm::dot(glm::cross(b_coords - a_coords, c_coords - a_coords),
                      normal);
 
-        if (!parent->vertNorms) parent->generateNormals();
-
-        auto interp = glm::normalize(alpha * parent->normals[ids[0]] +
+        //if (!parent->vertNorms) parent->generateNormals();
+        glm::dvec3 interp;
+        if(parent->vertNorms) { 
+            interp = glm::normalize(alpha * parent->normals[ids[0]] +
                                      beta * parent->normals[ids[1]] +
                                      gamma * parent->normals[ids[2]]);
-
+    
+            Material zero = Material();
+            zero += alpha * *parent->materials[ids[0]];
+            zero += beta * *parent->materials[ids[1]];
+            zero += gamma * *parent->materials[ids[2]];
+            i.setMaterial(zero);
+        }
+        else { 
+            interp = normal;
+            i.setMaterial(this->getMaterial());
+        }
+    
         i.setT(t);
-        i.setMaterial(this->getMaterial());
-
         i.setN(glm::normalize(interp));
-
         i.setObject(this);
         i.setBary(alpha, beta, gamma);
         i.setUVCoordinates(glm::dvec2(alpha, beta));
