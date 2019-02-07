@@ -57,7 +57,7 @@ glm::dvec3 Material::shade(Scene* scene, const ray& r, const isect& i) const {
         glm::dvec3 reflect = 2 * glm::dot(l, normal) * normal - l;
 
         glm::dvec3 atten = pLight->getColor();
-        atten *= min(1.0, pLight->distanceAttenuation(pos));
+        atten *= glm::clamp(1.0, 0.0, pLight->distanceAttenuation(pos));
         ray shadow(pos + 1e-7 * normal, l, glm::dvec3(1.0, 1.0, 1.0),
                    ray::SHADOW);
         atten *= pLight->shadowAttenuation(shadow, pos + 1e-7 * normal);
