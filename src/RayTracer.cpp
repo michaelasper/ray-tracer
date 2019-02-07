@@ -98,12 +98,12 @@ glm::dvec3 RayTracer::traceRay(ray& r, const glm::dvec3& thresh, int depth,
     if (scene->intersect(r, i)) {
         const Material& m = i.getMaterial();
         colorC = m.shade(scene.get(), r, i);
-
+        double newT = i.getT();
         // Reflections
         if (depth > 0 && m.Refl()) {
             auto reflect = reflectDirection(r, i);
             auto new_depth = depth - 1;
-            colorC += traceRay(reflect, thresh, new_depth, t) * m.kr(i);
+            colorC += traceRay(reflect, thresh, new_depth, newT) * m.kr(i);
         }
 
         // Refractions
@@ -127,7 +127,13 @@ glm::dvec3 RayTracer::traceRay(ray& r, const glm::dvec3& thresh, int depth,
                 ray refrac(r.at(i), T, r.getAtten(),
                            (r.type() == ray::REFRACTION ? ray::VISIBILITY
                                                         : ray::REFRACTION));
-                colorC += traceRay(refrac, thresh, new_depth, t) * m.kt(i);
+                colorC += traceRay(refrac, thresh, new_depth, newT) *
+                          glm::dvec3(std::pow(m.kt(i)[0], newT - t),
+                                     std::pow(m.kt(i)[1], newT - t),
+                                     std::pow(m.kt(i)[2], newT - t));
+            } else {
+                ray rfl = reflectDirection(r, i);
+                colorC += traceRay(rfl, thresh, new_depth, newT);
             }
         }
 

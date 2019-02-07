@@ -14,31 +14,15 @@ double DirectionalLight::distanceAttenuation(const glm::dvec3& P) const {
 
 glm::dvec3 DirectionalLight::shadowAttenuation(const ray& r,
                                                const glm::dvec3& p) const {
-    // YOUR CODE HERE:
-    // You should implement shadow-handling code here.
     isect i;
     ray shadow(r);
-    // have to check if t < t_light
     auto total = glm::dvec3(1.0, 1.0, 1.0);
     auto pos = glm::dvec3(0.0, 0.0, 0.0);
-    // std::cerr << "EEEE" << std::endl;
-    // std::cout << "CCCC" << std::endl;
-    while (this->scene->intersect(shadow, i)) {
+    if (this->scene->intersect(shadow, i)) {
         if (!i.getMaterial().Trans()) {
-            return glm::dvec3(0.0, 0.0, 0.0);
-        } else {
-            if (glm::dot(shadow.getDirection(), i.getN()) > 0) {
-                for (int j = 0; j < 3; j++) {
-                    total[j] *= pow(i.getMaterial().kt(i)[j], i.getT());
-                }
-                pos = i.getN() * .001;
-            } else {
-                pos = -i.getN() * .001;
-            }
-            shadow.setPosition(shadow.at(i) + pos);
+            return i.getMaterial().kt(i);
         }
     }
-    // std::cerr << total << std::endl;
     return total;
 }
 
@@ -55,7 +39,7 @@ glm::dvec3 DirectionalLight::getDirection(const glm::dvec3& P) const {
 
 // return 1.0;
 double PointLight::distanceAttenuation(const glm::dvec3& P) const {
-    double d = glm::sqrt(glm::dot(position - P, position - P));
+    double d = glm::distance(position, P);
     return 1.0 / (constantTerm + linearTerm * d + quadraticTerm * d * d);
 }
 
@@ -71,22 +55,30 @@ glm::dvec3 PointLight::shadowAttenuation(const ray& r,
     ray shadow(r);
     double diff = glm::length(p - position);
     // have to check if t < t_light
-    auto total = glm::dvec3(1.0, 1.0, 1.0);
     auto pos = glm::dvec3(0.0, 0.0, 0.0);
-    while (this->scene->intersect(shadow, i)) {
-        if (i.getT() < diff) return total;
-        if (!i.getMaterial().Trans()) {
-            return glm::dvec3(0.0, 0.0, 0.0);
-        } else {
-            for (int j = 0; j < 3; j++) {
-                total[j] *= glm::pow(i.getMaterial().kt(i)[j], i.getT());
-            }
-            pos = i.getN() * .000001;
-            shadow.setPosition(shadow.at(i) + pos);
-        }
-    }
 
-    return total;
+    if (this->scene->intersect(shadow, i) && i.getT() < diff) {
+        if (i.getMaterial().Trans()) {
+            isect i2;
+            shadow.setPosition(shadow.at(i.getT() + 0.0001));
+            if (this->scene->intersect(shadow, i2)) {
+                double d = i2.getT();
+                auto trans = i.getMaterial().kt(i);
+                glm::dvec3 atten(std::pow(trans[0], d), std::pow(trans[1], d),
+                                 std::pow(trans[2], d));
+
+                shadow.setPosition(shadow.at(i.getT() + 0.0001));
+                atten *= this->shadowAttenuation(shadow, shadow.getPosition());
+                return atten;
+            } else {
+                return glm::dvec3(0.0, 0.0, 0.0);
+            }
+        } else {
+            return glm::dvec3(0.0, 0.0, 0.0);
+        }
+    } else {
+        return glm::dvec3(1.0, 1.0, 1.0);
+    }
 }
 
 #define VERBOSE 0
