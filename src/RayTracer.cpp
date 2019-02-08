@@ -84,7 +84,8 @@ glm::dvec3 RayTracer::tracePixel(int i, int j) {
 ray reflectDirection(ray& r, const isect& i) {
     glm::dvec3 w_in = r.getDirection();
     auto w_ref = w_in - 2 * glm::dot(w_in, i.getN()) * i.getN();
-    return ray(r.at(i.getT()), w_ref, r.getAtten(), ray::REFLECTION);
+    return ray(r.at(i.getT()) + i.getN() * RAY_EPSILON, w_ref, r.getAtten(),
+               ray::REFLECTION);
 }
 
 glm::dvec3 RayTracer::traceRay(ray& r, const glm::dvec3& thresh, int depth,
@@ -98,11 +99,12 @@ glm::dvec3 RayTracer::traceRay(ray& r, const glm::dvec3& thresh, int depth,
     if (scene->intersect(r, i)) {
         const Material& m = i.getMaterial();
         colorC = m.shade(scene.get(), r, i);
-        double newT = i.getT();
+        t = i.getT();
         // Reflections
         if (depth > 0 && m.Refl()) {
             auto reflect = reflectDirection(r, i);
             auto new_depth = depth - 1;
+            double newT = 0;
             colorC += traceRay(reflect, thresh, new_depth, newT) * m.kr(i);
         }
 
@@ -122,19 +124,20 @@ glm::dvec3 RayTracer::traceRay(ray& r, const glm::dvec3& thresh, int depth,
             auto T = glm::refract(r.getDirection(), N, n1 / n2);
             auto new_depth = depth - 1;
 
-            // tir
+            ray rfl = reflectDirection(r, i);
             if (T.length() != 0) {
-                ray refrac(r.at(i), T, r.getAtten(),
-                           (r.type() == ray::REFRACTION ? ray::VISIBILITY
-                                                        : ray::REFRACTION));
-                colorC += traceRay(refrac, thresh, new_depth, newT) *
-                          glm::dvec3(std::pow(m.kt(i)[0], newT - t),
-                                     std::pow(m.kt(i)[1], newT - t),
-                                     std::pow(m.kt(i)[2], newT - t));
-            } else {
-                ray rfl = reflectDirection(r, i);
-                colorC += traceRay(rfl, thresh, new_depth, newT);
+                rfl = ray(r.at(i), T, r.getAtten(),
+                          (r.type() == ray::REFRACTION ? ray::VISIBILITY
+                                                       : ray::REFRACTION));
             }
+
+            double newT = 0;
+            auto temp = traceRay(rfl, thresh, new_depth, newT);
+            if (r.type() != ray::REFRACTION)
+                temp *= glm::dvec3(std::pow(m.kt(i)[0], newT),
+                                   std::pow(m.kt(i)[1], newT),
+                                   std::pow(m.kt(i)[2], newT));
+            colorC += temp;
         }
 
     } else {
