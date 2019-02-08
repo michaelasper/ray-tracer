@@ -64,8 +64,10 @@ glm::dvec3 Material::shade(Scene* scene, const ray& r, const isect& i) const {
 
         // Phong Model
         intensity +=
-            atten * (kd(i) * max(glm::dot(l, normal), 0.0) +
-                     ks(i) * pow(max(glm::dot(v, reflect), 0.0), alpha));
+            atten *
+            (kd(i) * (i.getMaterial().Trans() ? abs(glm::dot(l, normal))
+                                              : max(glm::dot(l, normal), 0.0)) +
+             ks(i) * pow(max(glm::dot(v, reflect), 0.0), alpha));
     }
 
     return intensity;
