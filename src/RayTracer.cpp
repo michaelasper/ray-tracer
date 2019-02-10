@@ -260,9 +260,32 @@ void RayTracer::traceImage(int w, int h) {
     // traceSetup(w, h);
 
     traceSetup(w, h);
-    this->samples = 3;
-    for (int i = 0; i < w; i++) {
-        for (int j = 0; j < h; j++) {
+    for (int i = 0; i<w; i++) {
+        for(int j = 0; j<h; j++) {
+            tracePixel(i, j);
+        }
+    }
+
+    // // YOUR CODE HERE
+    // // FIXME: Start one or more threads for ray tracing
+    // //
+    // // TIPS: Ideally, the traceImage should be executed asynchronously,
+    // //       i.e. returns IMMEDIATELY after working threads are launched.
+    // //
+    // //       An asynchronous traceImage lets the GUI update your results
+    // //       while rendering.
+}
+
+int RayTracer::aaImage() {
+    // YOUR CODE HERE
+    // FIXME: Implement Anti-aliasing here
+    //
+    // TIP: samples and aaThresh have been synchronized with TraceUI by
+    //      RayTracer::traceSetup() function
+    // traceSetup(w, h);
+
+    for (int i = 0; i < buffer_width; i++) {
+        for (int j = 0; j < buffer_height; j++) {
             glm::dvec3 color(0.0, 0.0, 0.0);
             for (int m = 0; m < samples; m++) {
                 for (int n = 0; n < samples; n++) {
@@ -277,46 +300,6 @@ void RayTracer::traceImage(int w, int h) {
             setPixel(i, j, color);
         }
     }
-
-    // // YOUR CODE HERE
-    // // FIXME: Start one or more threads for ray tracing
-    // //
-    // // TIPS: Ideally, the traceImage should be executed asynchronously,
-    // //       i.e. returns IMMEDIATELY after working threads are launched.
-    // //
-    // //       An asynchronous traceImage lets the GUI update your results
-    // //       while rendering.
-
-    // for (int i = 0; i < w; i++) {
-    //     for (int j = 0; j < h; j++) {
-    //         tracePixel(i, j);
-    //     }
-    // }
-}
-
-int RayTracer::aaImage() {
-    // YOUR CODE HERE
-    // FIXME: Implement Anti-aliasing here
-    //
-    // TIP: samples and aaThresh have been synchronized with TraceUI by
-    //      RayTracer::traceSetup() function
-    // traceSetup(w, h);
-
-    // for (int i = 0; i < w; i++) {
-    //     for (int j = 0; j < h; j++) {
-    //         glm::dvec3 color;
-    //         for (int m = 0; m < samples; m++) {
-    //             for (int n = 0; n < samples; n++) {
-    //                 double x = double(m) / double(buffer_width * samples);
-    //                 double y = double(n) / double(buffer_height * samples);
-    //                 color += trace(x, y);
-    //             }
-    //         }
-    //         color /= (samples * samples);
-    //         setPixel(i, j, color);
-    //     }
-    // }
-
     return 0;
 }
 
