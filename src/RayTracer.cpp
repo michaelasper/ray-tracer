@@ -125,7 +125,7 @@ glm::dvec3 RayTracer::traceRay(ray& r, const glm::dvec3& thresh, int depth,
             auto new_depth = depth - 1;
 
             ray rfl = reflectDirection(r, i);
-            if (T.length() != 0) {
+            if (T != glm::dvec3(0)) {
                 rfl = ray(r.at(i), T, r.getAtten(),
                           (r.type() == ray::REFRACTION ? ray::VISIBILITY
                                                        : ray::REFRACTION));
@@ -260,8 +260,8 @@ void RayTracer::traceImage(int w, int h) {
     // traceSetup(w, h);
 
     traceSetup(w, h);
-    for (int i = 0; i<w; i++) {
-        for(int j = 0; j<h; j++) {
+    for (int i = 0; i < w; i++) {
+        for (int j = 0; j < h; j++) {
             tracePixel(i, j);
         }
     }
