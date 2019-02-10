@@ -19,7 +19,23 @@ glm::dvec3 DirectionalLight::shadowAttenuation(const ray& r,
     auto total = glm::dvec3(1.0, 1.0, 1.0);
     auto pos = glm::dvec3(0.0, 0.0, 0.0);
     if (this->scene->intersect(shadow, i)) {
-        if (!i.getMaterial().Trans()) {
+        if (i.getMaterial().Trans()) {
+            isect i2;
+            
+            shadow.setPosition(shadow.at(i.getT() + RAY_EPSILON));
+            if (this->scene->intersect(shadow, i2)) {
+                double d = i2.getT();
+                auto atten = i.getMaterial().kt(i);
+                glm::dvec3 atten(std::pow(trans[0], d), std::pow(trans[1], d),
+                                 std::pow(trans[2], d));
+
+                shadow.setPosition(shadow.at(i.getT() + RAY_EPSILON));
+                atten *= this->shadowAttenuation(shadow, shadow.getPosition());
+                return atten;
+            } else {
+                return total;
+            }
+        } else {
             return i.getMaterial().kt(i);
         }
     }
