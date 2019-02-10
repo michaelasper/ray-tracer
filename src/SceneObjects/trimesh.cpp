@@ -124,22 +124,24 @@ bool TrimeshFace::intersectLocal(ray& r, isect& i) const {
                      normal);
 
         // if (!parent->vertNorms) parent->generateNormals();
+
+        // Interpolate materials
+        if (parent->materials.size() > 0) {
+            Material accumulate = (alpha * *(parent->materials[ids[0]]));
+            accumulate += (beta * *(parent->materials[ids[1]]));
+            accumulate += (gamma * *(parent->materials[ids[2]]));
+            i.setMaterial(accumulate);
+        } else {
+            i.setMaterial(this->getMaterial());
+        }
+
         glm::dvec3 interp;
         if (parent->vertNorms) {
             interp = glm::normalize(alpha * parent->normals[ids[0]] +
                                     beta * parent->normals[ids[1]] +
                                     gamma * parent->normals[ids[2]]);
-            if (parent->materials.size() > 0) {
-                Material accumulate = (alpha * *(parent->materials[ids[0]]));
-                accumulate += (beta * *(parent->materials[ids[1]]));
-                accumulate += (gamma * *(parent->materials[ids[2]]));
-                i.setMaterial(accumulate);
-            } else {
-                i.setMaterial(this->getMaterial());
-            }
         } else {
             interp = glm::normalize(normal);
-            i.setMaterial(this->getMaterial());
         }
 
         i.setT(t);
