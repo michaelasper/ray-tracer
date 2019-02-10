@@ -25,7 +25,7 @@ glm::dvec3 DirectionalLight::shadowAttenuation(const ray& r,
             shadow.setPosition(shadow.at(i.getT() + RAY_EPSILON));
             if (this->scene->intersect(shadow, i2)) {
                 double d = i2.getT();
-                auto atten = i.getMaterial().kt(i);
+                auto trans = i.getMaterial().kt(i);
                 glm::dvec3 atten(std::pow(trans[0], d), std::pow(trans[1], d),
                                  std::pow(trans[2], d));
 
