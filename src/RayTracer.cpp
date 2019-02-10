@@ -92,16 +92,15 @@ glm::dvec3 RayTracer::traceRay(ray& r, const glm::dvec3& thresh, int depth,
                                double& t) {
     isect i;
     glm::dvec3 colorC;
-#if VERBOSE
-    std::cerr << "== current depth: " << depth << std::endl;
-#endif
+
+    if (depth < 0) return colorC = glm::dvec3(0.0, 0.0, 0.0);
 
     if (scene->intersect(r, i)) {
         const Material& m = i.getMaterial();
         colorC = m.shade(scene.get(), r, i);
         t = i.getT();
         // Reflections
-        if (depth > 0 && m.Refl()) {
+        if (m.Refl() && r.type() == ray::REFRACTION) {
             auto reflect = reflectDirection(r, i);
             auto new_depth = depth - 1;
             double newT = 0;
@@ -110,7 +109,7 @@ glm::dvec3 RayTracer::traceRay(ray& r, const glm::dvec3& thresh, int depth,
 
         // Refractions
         // https://www.scratchapixel.com/lessons/3d-basic-rendering/introduction-to-shading/reflection-refraction-fresnel
-        if (depth > 0 && m.Trans()) {
+        if (m.Trans()) {
             auto N = i.getN();
 
             double n1 = 1;
@@ -141,21 +140,8 @@ glm::dvec3 RayTracer::traceRay(ray& r, const glm::dvec3& thresh, int depth,
         }
 
     } else {
-        // No intersection.  This ray travels to infinity, so we color
-        // it according to the background color, which in this (simple) case
-        // is just black.
-        //
-        // FIXME: Add CubeMap support here.
-        // TIPS: CubeMap object can be fetched from traceUI->getCubeMap();
-        //       Check traceUI->cubeMap() to see if cubeMap is loaded
-        //       and enabled.
-
         colorC = glm::dvec3(0.0, 0.0, 0.0);
     }
-#if VERBOSE
-    std::cerr << "== depth: " << depth + 1 << " done, returning: " << colorC
-              << std::endl;
-#endif
     return colorC;
 }
 
