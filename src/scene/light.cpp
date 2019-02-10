@@ -19,7 +19,7 @@ glm::dvec3 DirectionalLight::shadowAttenuation(const ray& r,
     auto total = glm::dvec3(1.0, 1.0, 1.0);
     auto pos = glm::dvec3(0.0, 0.0, 0.0);
     if (this->scene->intersect(shadow, i)) {
-        if (i.getMaterial().Trans()) {
+        if (!i.getMaterial().Trans()) {
             return i.getMaterial().kt(i);
         }
     }
