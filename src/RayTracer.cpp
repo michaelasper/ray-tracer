@@ -99,7 +99,7 @@ glm::dvec3 RayTracer::traceRay(ray& r, const glm::dvec3& thresh, int depth,
         const Material& m = i.getMaterial();
         colorC = m.shade(scene.get(), r, i);
         t = i.getT();
-        bool inside = r.type() == ray::REFRACTION;
+        bool inside = glm::dot(-r.getDirection(), i.getN()) < 0;
         // Reflections
         if (m.Refl() && !inside) {
             auto reflect = reflectDirection(r, i);
