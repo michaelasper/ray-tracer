@@ -135,7 +135,7 @@ glm::dvec3 RayTracer::traceRay(ray& r, const glm::dvec3& thresh, int depth,
                 double newT = 0;
                 auto temp = traceRay(refract, thresh, new_depth, newT);
 
-                if (!r.type() == ray::REFRACTION)
+                if (r.type() != ray::REFRACTION)
                     temp *= glm::dvec3(std::pow(m.kt(i)[0], newT),
                                        std::pow(m.kt(i)[1], newT),
                                        std::pow(m.kt(i)[2], newT));
