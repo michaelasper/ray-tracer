@@ -99,8 +99,9 @@ glm::dvec3 RayTracer::traceRay(ray& r, const glm::dvec3& thresh, int depth,
         const Material& m = i.getMaterial();
         colorC = m.shade(scene.get(), r, i);
         t = i.getT();
+        bool inside = r.type() == ray::REFRACTION;
         // Reflections
-        if (m.Refl() && r.type() != ray::REFRACTION) {
+        if (m.Refl() && !inside) {
             auto reflect = reflectDirection(r, i);
             auto new_depth = depth - 1;
             double newT = 0;
@@ -115,7 +116,7 @@ glm::dvec3 RayTracer::traceRay(ray& r, const glm::dvec3& thresh, int depth,
             double n1 = 1;
             double n2 = m.index(i);
 
-            if (r.type() == ray::REFRACTION) {
+            if (inside) {
                 std::swap(n1, n2);
                 N = -N;
             }
@@ -128,14 +129,12 @@ glm::dvec3 RayTracer::traceRay(ray& r, const glm::dvec3& thresh, int depth,
             if (T != glm::dvec3(0)) {
                 glm::dvec3 pos = r.at(i) - RAY_EPSILON * N;
 
-                ray refract =
-                    ray(pos, T, r.getAtten(),
-                        (r.type() == ray::REFRACTION ? ray::VISIBILITY
-                                                     : ray::REFRACTION));
+                ray refract = ray(pos, T, r.getAtten(),
+                                  (inside ? ray::VISIBILITY : ray::REFRACTION));
                 double newT = 0;
                 auto temp = traceRay(refract, thresh, new_depth, newT);
 
-                if (!r.type() == ray::REFRACTION)
+                if (!inside)
                     temp *= glm::dvec3(std::pow(m.kt(i)[0], newT),
                                        std::pow(m.kt(i)[1], newT),
                                        std::pow(m.kt(i)[2], newT));
@@ -146,7 +145,7 @@ glm::dvec3 RayTracer::traceRay(ray& r, const glm::dvec3& thresh, int depth,
                 double newT = 0;
                 auto temp = traceRay(reflect, thresh, new_depth, newT);
 
-                if (!r.type() == ray::REFRACTION)
+                if (!inside)
                     temp *= glm::dvec3(std::pow(m.kt(i)[0], newT),
                                        std::pow(m.kt(i)[1], newT),
                                        std::pow(m.kt(i)[2], newT));
