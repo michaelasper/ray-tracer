@@ -100,7 +100,7 @@ glm::dvec3 RayTracer::traceRay(ray& r, const glm::dvec3& thresh, int depth,
         colorC = m.shade(scene.get(), r, i);
         t = i.getT();
         // Reflections
-        if (m.Refl() && !r.type() == ray::REFRACTION) {
+        if (m.Refl() && r.type() != ray::REFRACTION) {
             auto reflect = reflectDirection(r, i);
             auto new_depth = depth - 1;
             double newT = 0;
@@ -126,8 +126,10 @@ glm::dvec3 RayTracer::traceRay(ray& r, const glm::dvec3& thresh, int depth,
             // handle TIR here
 
             if (T != glm::dvec3(0)) {
+                glm::dvec3 pos = r.at(i) - RAY_EPSILON * N;
+
                 ray refract =
-                    ray(r.at(i), T, r.getAtten(),
+                    ray(pos, T, r.getAtten(),
                         (r.type() == ray::REFRACTION ? ray::VISIBILITY
                                                      : ray::REFRACTION));
                 double newT = 0;
@@ -140,10 +142,11 @@ glm::dvec3 RayTracer::traceRay(ray& r, const glm::dvec3& thresh, int depth,
                 colorC += temp;
             } else if (m.Refl()) {
                 ray reflect = reflectDirection(r, i);
+                reflect.setPosition(r.at(i) - RAY_EPSILON * N);
                 double newT = 0;
                 auto temp = traceRay(reflect, thresh, new_depth, newT);
 
-                if (!r.type() == ray::REFRACTION)
+                if (r.type() != ray::REFRACTION)
                     temp *= glm::dvec3(std::pow(m.kt(i)[0], newT),
                                        std::pow(m.kt(i)[1], newT),
                                        std::pow(m.kt(i)[2], newT));
