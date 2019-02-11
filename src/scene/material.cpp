@@ -13,45 +13,16 @@ extern bool debugMode;
 
 Material::~Material() {}
 
-// Apply the phong model to this point on the surface of the object, returning
-// the color of that point.
-
-// YOUR CODE HERE
-
-// For now, this method just returns the diffuse color of the object.
-// This gives a single matte color for every distinct surface in the
-// scene, and that's it.  Simple, but enough to get you started.
-// (It's also inconsistent with the phong model...)
-
-// Your mission is to fill in this method with the rest of the phong
-// shading model, including the contributions of all the light sources.
-// You will need to call both distanceAttenuation() and
-// shadowAttenuation()
-// somewhere in your code in order to compute shadows and light falloff.
-//	if( debugMode )
-//		std::cout << "Debugging Phong code..." << std::endl;
-
-// When you're iterating through the lights,
-// you'll want to use code that looks something
-// like this:
-//
-// for ( const auto& pLight : scene->getAllLights() )
-// {
-//              // pLight has type unique_ptr<Light>
-// 		.
-// 		.
-// 		.
-// }
 glm::dvec3 Material::shade(Scene* scene, const ray& r, const isect& i) const {
     glm::dvec3 normal = i.getN();
-    glm::dvec3 v = -r.getDirection();
-    if (v != glm::dvec3(0.0, 0.0, 0.0)) v = glm::normalize(v);
+    glm::dvec3 v = glm::normalize(-r.getDirection());
 
     glm::dvec3 Ia = scene->ambient();
     glm::dvec3 intensity = ke(i) + ka(i) * Ia;
     glm::dvec3 pos = r.at(i);
     double alpha = shininess(i);
 
+    // iterate through all the lights
     for (const auto& pLight : scene->getAllLights()) {
         glm::dvec3 l = pLight->getDirection(pos);
         glm::dvec3 reflect = 2 * glm::dot(l, normal) * normal - l;
@@ -63,11 +34,10 @@ glm::dvec3 Material::shade(Scene* scene, const ray& r, const isect& i) const {
         atten *= pLight->shadowAttenuation(shadow, pos + 1e-7 * normal);
 
         // Phong Model
-        intensity +=
-            atten *
-            (kd(i) * (i.getMaterial().Trans() ? abs(glm::dot(l, normal))
-                                              : max(glm::dot(l, normal), 0.0)) +
-             ks(i) * pow(max(glm::dot(v, reflect), 0.0), alpha));
+        auto diffuse = kd(i) * (i.getMaterial().Trans() ? abs(glm::dot(l, normal)) : max(glm::dot(l, normal), 0.0));
+        auto spec = ks(i) * pow(max(glm::dot(v, reflect), 0.0), alpha);
+
+        intensity += atten * (diffuse + spec);
     }
 
     return intensity;

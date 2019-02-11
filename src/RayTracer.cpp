@@ -126,7 +126,7 @@ glm::dvec3 RayTracer::traceRay(ray& r, const glm::dvec3& thresh, int depth,
 
             // handle TIR here
 
-            if (T != glm::dvec3(0)) {
+            if (!isnan(T[0])) {
                 glm::dvec3 pos = r.at(i) - RAY_EPSILON * N;
 
                 ray refract = ray(pos, T, r.getAtten(),
