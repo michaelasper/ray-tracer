@@ -77,17 +77,20 @@ glm::dvec3 PointLight::shadowAttenuation(const ray& r,
         if (i.getMaterial().Trans()) {
             isect i2;
             shadow.setPosition(shadow.at(i.getT() + 0.0001));
-            if (this->scene->intersect(shadow, i2)) {
-                double d = i2.getT();
+            if (glm::dot(shadow.getDirection(), i.getN()) > 0) {
+                double d = i.getT();
                 auto trans = i.getMaterial().kt(i);
                 glm::dvec3 atten(std::pow(trans[0], d), std::pow(trans[1], d),
                                  std::pow(trans[2], d));
 
-                shadow.setPosition(shadow.at(i.getT() + 0.0001));
+                pos = i.getN() * RAY_EPSILON;
+                shadow.setPosition(shadow.at(i) + pos);
                 atten *= this->shadowAttenuation(shadow, shadow.getPosition());
                 return atten;
             } else {
-                return glm::dvec3(0.0, 0.0, 0.0);
+                pos = i.getN() * -RAY_EPSILON;
+                shadow.setPosition(shadow.at(i) + pos);
+                return this->shadowAttenuation(shadow, shadow.getPosition());
             }
         } else {
             return glm::dvec3(0.0, 0.0, 0.0);
