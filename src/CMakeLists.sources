@@ -12,6 +12,8 @@
 ./SceneObjects/trimesh.h
 ./SceneObjects/Square.cpp
 ./SceneObjects/Square.h
+./SceneObjects/Circle.cpp
+./SceneObjects/Circle.h
 ./SceneObjects/Box.h
 ./SceneObjects/Cone.cpp
 ./SceneObjects/Box.cpp
