@@ -1,7 +1,7 @@
 # Ray Tracing
 
 Michael Asper - ma53285
-Daniel Mancia 
+Daniel Mancia - dam4754
 
 
 ## Completed Features
