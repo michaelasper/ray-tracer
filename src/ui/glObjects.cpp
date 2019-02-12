@@ -13,6 +13,7 @@
 #include "../SceneObjects/Cylinder.h"
 #include "../SceneObjects/Sphere.h"
 #include "../SceneObjects/Square.h"
+#include "../SceneObjects/Circle.h"
 #include "../SceneObjects/trimesh.h"
 
 using namespace std;
@@ -330,6 +331,28 @@ void Square::glDrawLocal(int quality, bool actualMaterials, bool actualTextures)
 
 	glCallList(dispListItr->second);
 }
+
+void Circle::glDrawLocal(int quality, bool actualMaterials, bool actualTextures) const
+{
+	// TODO: TBH IDK WHAT THIS DOES
+	// Use this for display lists
+	static std::map<int, GLuint> displayLists;
+
+	std::map<int, GLuint>::iterator dispListItr = displayLists.find( quality );
+	if( dispListItr == displayLists.end() )
+	{
+		dispListItr = (displayLists.insert( std::make_pair(quality, glGenLists(1)) )).first;
+		glNewList(dispListItr->second, GL_COMPILE);
+
+		drawTesselatedSquare( quality );
+
+		glEndList();
+	}
+
+	glCallList(dispListItr->second);
+}
+
+
 
 
 void Trimesh::glDrawLocal(int quality, bool actualMaterials, bool actualTextures) const

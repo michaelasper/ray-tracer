@@ -50,6 +50,7 @@ Scene* Parser::parseScene()
       case SPHERE:
       case BOX:
       case SQUARE:
+      case CIRCLE:
       case CYLINDER:
       case CONE:
       case TRIMESH:
@@ -162,6 +163,7 @@ void Parser::parseTransformableElement( Scene* scene, TransformNode* transform, 
       case SPHERE:
       case BOX:
       case SQUARE:
+      case CIRCLE:
       case CYLINDER:
       case CONE:
       case TRIMESH:
@@ -192,6 +194,7 @@ void Parser::parseGroup(Scene* scene, TransformNode* transform, const Material& 
       case SPHERE:
       case BOX:
       case SQUARE:
+      case CIRCLE:
       case CYLINDER:
       case CONE:
       case TRIMESH:
@@ -230,6 +233,9 @@ void Parser::parseGeometry(Scene* scene, TransformNode* transform, const Materia
       return;
     case SQUARE:
       parseSquare(scene, transform, mat);
+      return;
+    case CIRCLE:
+      parseCircle(scene, transform, mat);
       return;
     case CYLINDER:
       parseCylinder(scene, transform, mat);
@@ -457,6 +463,40 @@ void Parser::parseSquare(Scene* scene, TransformNode* transform, const Material&
         return;
       default:
         throw SyntaxErrorException( "Expected: square attributes", _tokenizer );
+        
+    }
+  }
+}
+
+void Parser::parseCircle(Scene* scene, TransformNode* transform, const Material& mat)
+{
+  Circle* circle = 0;
+  Material* newMat = 0;
+
+  _tokenizer.Read( CIRCLE );
+  _tokenizer.Read( LBRACE );
+
+  for( ;; )
+  {
+    const Token* t = _tokenizer.Peek();
+
+    switch( t->kind() )
+    {
+      case MATERIAL:
+        delete newMat;
+        newMat = parseMaterialExpression( scene, mat );
+        break;
+      case NAME:
+        parseIdentExpression();
+        break;
+      case RBRACE:
+         _tokenizer.Read( RBRACE );
+        circle = new Circle(scene, newMat ? newMat : new Material(mat));
+        circle->setTransform( transform );
+        scene->add( circle );
+        return;
+      default:
+        throw SyntaxErrorException( "Expected: circle attributes", _tokenizer );
         
     }
   }

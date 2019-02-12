@@ -53,6 +53,7 @@ enum SYMBOL {
   SPHERE,					// primitives
   BOX,
   SQUARE,
+  CIRCLE,
   CYLINDER,
   CONE,
   TRIMESH,  
