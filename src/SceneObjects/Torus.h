@@ -7,7 +7,7 @@ class Torus
 	: public MaterialSceneObject
 {
 public:
-	Torus( Scene *scene, Material *mat, double mr = 0.3, double mR = 1 )
+	Torus( Scene *scene, Material *mat, double mr = 0.5, double mR = 1 )
 		: MaterialSceneObject( scene, mat )
 	{
         minor_r = mr;
@@ -20,8 +20,8 @@ public:
     virtual BoundingBox ComputeLocalBoundingBox()
     {
         BoundingBox localbounds;
-		localbounds.setMin(glm::dvec3(-major_r, -major_r, -major_r));
-		localbounds.setMax(glm::dvec3(major_r, major_r, major_r));
+		localbounds.setMin(glm::dvec3(-major_r-minor_r, -major_r-minor_r, -major_r-minor_r));
+		localbounds.setMax(glm::dvec3(major_r+minor_r, major_r+minor_r, major_r+minor_r));
         return localbounds;
     }
 
