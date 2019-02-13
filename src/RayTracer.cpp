@@ -139,7 +139,7 @@ glm::dvec3 RayTracer::traceRay(ray& r, const glm::dvec3& thresh, int depth,
                                        std::pow(m.kt(i)[1], newT),
                                        std::pow(m.kt(i)[2], newT));
                 colorC += temp;
-            } else if (m.Refl()) {
+            } else {
                 // ray reflect = reflectDirection(r, i);
                 glm::dvec3 w_in = r.getDirection();
                 auto w_ref = w_in - 2 * glm::dot(w_in, -i.getN()) * -i.getN();
@@ -154,7 +154,7 @@ glm::dvec3 RayTracer::traceRay(ray& r, const glm::dvec3& thresh, int depth,
                                        std::pow(m.kt(i)[1], newT),
                                        std::pow(m.kt(i)[2], newT));
 
-                colorC += m.kr(i) * temp;
+                colorC += temp;
             }
         }
 
