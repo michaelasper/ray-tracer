@@ -14,6 +14,7 @@
 #include "../SceneObjects/Sphere.h"
 #include "../SceneObjects/Square.h"
 #include "../SceneObjects/Circle.h"
+#include "../SceneObjects/Torus.h"
 #include "../SceneObjects/trimesh.h"
 
 using namespace std;
@@ -352,6 +353,25 @@ void Circle::glDrawLocal(int quality, bool actualMaterials, bool actualTextures)
 	glCallList(dispListItr->second);
 }
 
+
+void Torus::glDrawLocal(int quality, bool actualMaterials, bool actualTextures) const
+{
+	// Use this for display lists
+	static std::map<int, GLuint> displayLists;
+
+	std::map<int, GLuint>::iterator dispListItr = displayLists.find( quality );
+	if( dispListItr == displayLists.end() )
+	{
+		dispListItr = (displayLists.insert( std::make_pair(quality, glGenLists(1)) )).first;
+		glNewList(dispListItr->second, GL_COMPILE);
+
+		drawTesselatedSquare( quality );
+
+		glEndList();
+	}
+
+	glCallList(dispListItr->second);
+}
 
 
 

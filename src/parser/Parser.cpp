@@ -53,6 +53,7 @@ Scene* Parser::parseScene()
       case CIRCLE:
       case CYLINDER:
       case CONE:
+      case TORUS:
       case TRIMESH:
       case TRANSLATE:
       case ROTATE:
@@ -166,6 +167,7 @@ void Parser::parseTransformableElement( Scene* scene, TransformNode* transform, 
       case CIRCLE:
       case CYLINDER:
       case CONE:
+      case TORUS:
       case TRIMESH:
       case TRANSLATE:
       case ROTATE:
@@ -197,6 +199,7 @@ void Parser::parseGroup(Scene* scene, TransformNode* transform, const Material& 
       case CIRCLE:
       case CYLINDER:
       case CONE:
+      case TORUS:
       case TRIMESH:
       case TRANSLATE:
       case ROTATE:
@@ -242,6 +245,9 @@ void Parser::parseGeometry(Scene* scene, TransformNode* transform, const Materia
       return;
     case CONE:
       parseCone(scene, transform, mat);
+      return;
+    case TORUS:
+      parseTorus(scene, transform, mat);
       return;
     case TRIMESH:
       parseTrimesh(scene, transform, mat);
@@ -586,6 +592,42 @@ void Parser::parseCone(Scene* scene, TransformNode* transform, const Material& m
     }
   }
 }
+
+void Parser::parseTorus(Scene* scene, TransformNode* transform, const Material& mat)
+{
+  Torus* torus = 0;
+  Material* newMat = 0;
+
+  _tokenizer.Read( TORUS );
+  _tokenizer.Read( LBRACE );
+
+  for( ;; )
+  {
+    const Token* t = _tokenizer.Peek();
+
+    switch( t->kind() )
+    {
+      case MATERIAL:
+        delete newMat;
+        newMat = parseMaterialExpression( scene, mat );
+        break;
+      case NAME:
+        parseIdentExpression();
+        break;
+      case RBRACE:
+        _tokenizer.Read( RBRACE );
+        torus = new Torus(scene, newMat ? newMat : new Material(mat));
+        torus->setTransform( transform );
+        scene->add( torus );
+        return;
+      default:
+        throw SyntaxErrorException( "Expected: torus attributes", _tokenizer );
+        
+    }
+  }
+}
+
+
 
 void Parser::parseTrimesh(Scene* scene, TransformNode* transform, const Material& mat)
 {
