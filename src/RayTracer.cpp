@@ -125,7 +125,7 @@ glm::dvec3 RayTracer::traceRay(ray& r, const glm::dvec3& thresh, int depth,
             auto new_depth = depth - 1;
 
             // handle TIR here
-        
+
             if (!isnan(T[0])) {
                 glm::dvec3 pos = r.at(i) - RAY_EPSILON * N;
 
@@ -155,6 +155,7 @@ glm::dvec3 RayTracer::traceRay(ray& r, const glm::dvec3& thresh, int depth,
                                        std::pow(m.kt(i)[2], newT));
 
                 colorC += temp;
+            }
         }
 
     } else {
