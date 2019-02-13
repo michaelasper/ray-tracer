@@ -34,7 +34,9 @@ glm::dvec3 Material::shade(Scene* scene, const ray& r, const isect& i) const {
         atten *= pLight->shadowAttenuation(shadow, pos + 1e-7 * normal);
 
         // Phong Model
-        auto diffuse = kd(i) * (i.getMaterial().Trans() ? abs(glm::dot(l, normal)) : max(glm::dot(l, normal), 0.0));
+        auto diffuse =
+            kd(i) * (i.getMaterial().Trans() ? abs(glm::dot(l, normal))
+                                             : max(glm::dot(l, normal), 0.0));
         auto spec = ks(i) * pow(max(glm::dot(v, reflect), 0.0), alpha);
 
         intensity += atten * (diffuse + spec);
@@ -56,26 +58,39 @@ TextureMap::TextureMap(string filename) {
 }
 
 glm::dvec3 TextureMap::getMappedValue(const glm::dvec2& coord) const {
-    // YOUR CODE HERE
-    //
-    // In order to add texture mapping support to the
-    // raytracer, you need to implement this function.
-    // What this function should do is convert from
-    // parametric space which is the unit square
-    // [0, 1] x [0, 1] in 2-space to bitmap coordinates,
-    // and use these to perform bilinear interpolation
-    // of the values.
+    double x = (coord[0] * (this->getWidth() - 1));
+    double y = (coord[1] * (this->getHeight() - 1));
 
-    return glm::dvec3(1, 1, 1);
+    double x1 = int(x);
+    double x2 = x1 + 1;
+    double y1 = int(y);
+    double y2 = y2 + 1;
+    auto q11 = getPixelAt(x1, y1);
+    auto q21 = getPixelAt(x2, y1);
+    auto q12 = getPixelAt(x1, y2);
+    auto q22 = getPixelAt(x1, y2);
+
+    // Bilinear interpolation from wikipedia
+    auto color = double(1 / ((x2 - x1) * (y2 - y1))) *
+                 (q11 * (x2 - x) * (y2 - y) + q21 * (x - x1) * (y2 - y) +
+                  q12 * (x2 - x) * (y - y1) + q22 * (x - x1) * (y - y2));
+
+    return color;
 }
 
 glm::dvec3 TextureMap::getPixelAt(int x, int y) const {
-    // YOUR CODE HERE
-    //
-    // In order to add texture mapping support to the
-    // raytracer, you need to implement this function.
+    glm::dvec3 pixelColor(0.0, 0.0, 0.0);
 
-    return glm::dvec3(1, 1, 1);
+    if (x < 0 || x >= this->getWidth()) return pixelColor;
+    if (y < 0 || y >= this->getHeight()) return pixelColor;
+
+    int offset = x + y * width;
+
+    for (int i = 0; i < 3; i++) {
+        pixelColor[i] = double(data[i + offset * 3]);
+    }
+
+    return pixelColor / 255.0;
 }
 
 glm::dvec3 MaterialParameter::value(const isect& is) const {
