@@ -56,6 +56,7 @@ enum SYMBOL {
   CIRCLE,
   CYLINDER,
   CONE,
+  TORUS,
   TRIMESH,  
 
   POSITION, VIEWDIR,		// keywords affecting primitives

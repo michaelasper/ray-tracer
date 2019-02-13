@@ -14,6 +14,8 @@
 ./SceneObjects/Square.h
 ./SceneObjects/Circle.cpp
 ./SceneObjects/Circle.h
+./SceneObjects/Torus.cpp
+./SceneObjects/Torus.h
 ./SceneObjects/Box.h
 ./SceneObjects/Cone.cpp
 ./SceneObjects/Box.cpp

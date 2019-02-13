@@ -21,6 +21,7 @@
 #include "../SceneObjects/Sphere.h"
 #include "../SceneObjects/Square.h"
 #include "../SceneObjects/Circle.h"
+#include "../SceneObjects/Torus.h"
 #include "../SceneObjects/trimesh.h"
 
 typedef std::map<string,Material> mmap;
@@ -70,6 +71,7 @@ private:
     void      parseBox(Scene* scene, TransformNode* transform, const Material& mat);
     void      parseSquare(Scene* scene, TransformNode* transform, const Material& mat);
     void      parseCircle(Scene* scene, TransformNode* transform, const Material& mat);
+    void      parseTorus(Scene* scene, TransformNode* transform, const Material& mat);
     void      parseCylinder(Scene* scene, TransformNode* transform, const Material& mat);
     void      parseCone(Scene* scene, TransformNode* transform, const Material& mat);
     void      parseTrimesh(Scene* scene, TransformNode* transform, const Material& mat);
