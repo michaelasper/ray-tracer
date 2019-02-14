@@ -45,6 +45,18 @@ glm::dvec3 Material::shade(Scene* scene, const ray& r, const isect& i) const {
     return intensity;
 }
 
+NormalMap::NormalMap(string filename) {
+    data = readImage(filename.c_str(), width, height);
+    if (data.empty()) {
+        width = 0;
+        height = 0;
+        string error("Unable to load texture map '");
+        error.append(filename);
+        error.append("'.");
+        throw TextureMapException(error);
+    }
+}
+
 TextureMap::TextureMap(string filename) {
     data = readImage(filename.c_str(), width, height);
     if (data.empty()) {
@@ -81,10 +93,8 @@ glm::dvec3 TextureMap::getMappedValue(const glm::dvec2& coord) const {
 glm::dvec3 TextureMap::getPixelAt(int x, int y) const {
     glm::dvec3 pixelColor(0.0, 0.0, 0.0);
 
-    if (x < 0 || x >= this->getWidth())
-        return getPixelAt(x % this->getWidth(), y);
-    if (y < 0 || y >= this->getHeight())
-        return getPixelAt(x, y % this->getHeight());
+    if (x < 0 || x >= this->getWidth()) return pixelColor;
+    if (y < 0 || y >= this->getHeight()) return pixelColor;
 
     int offset = x + y * width;
 

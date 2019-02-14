@@ -84,7 +84,13 @@ class isect {
         else
             material.reset(new Material(m));
     }
+
     void setUVCoordinates(const glm::dvec2& coords) { uvCoordinates = coords; }
+    void setBasis(const glm::mat3& m) {
+        tanBasis = glm::normalize(m[0]);
+        bitanBasis = glm::normalize(m[1]);
+        normalBasis = glm::normalize(m[2]);
+    }
     glm::dvec2 getUVCoordinates() const { return uvCoordinates; }
     void setBary(const glm::dvec3& weights) { bary = weights; }
     void setBary(const double alpha, const double beta, const double gamma) {
@@ -111,6 +117,9 @@ class isect {
     double t;
     glm::dvec3 N;
     glm::dvec2 uvCoordinates;
+    glm::dvec3 tanBasis;
+    glm::dvec3 bitanBasis;
+    glm::dvec3 normalBasis;
     glm::dvec3 bary;
 
     // if this intersection has its own material

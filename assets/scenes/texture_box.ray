@@ -20,7 +20,7 @@ point_light {
 scale(1.5,
 	square { 
 		material = { 
-			diffuse = map("skin1.bmp");
+			diffuse = map("brickwall.png");
 			specular = (1,1,0);
 			shininess = 64;
 		} 

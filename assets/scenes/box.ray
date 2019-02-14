@@ -28,7 +28,7 @@ directional_light {
 rotate( 0, 1, 1, -2,
 box { 
 	material = { 
-		diffuse = map("skin1.bmp");
+		diffuse = map("brickwall.png");
 //		diffuse = (0.7, 0, 1.0);
 		specular = (0.9,0.4,0.0);
 		shininess = 76.8;

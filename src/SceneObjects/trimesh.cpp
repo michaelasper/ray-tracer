@@ -144,11 +144,26 @@ bool TrimeshFace::intersectLocal(ray& r, isect& i) const {
             interp = glm::normalize(normal);
         }
 
+        // calculate basis u v
+        auto ugly =
+            glm::cross((b_coords - a_coords), glm::cross(c_coords, a_coords)) /
+            glm::normalize(glm::cross((b_coords - a_coords),
+                                      glm::cross(c_coords, a_coords)));
+        glm::mat3 lhs1(b_coords - a_coords, c_coords - a_coords, ugly);
+        glm::mat3 lhs2 = glm::inverse(glm::mat3(
+            glm::dvec3(b_coords[0] - a_coords[0], b_coords[1] - a_coords[1], 0),
+            glm::dvec3(c_coords[0] - a_coords[0], c_coords[1] - a_coords[1], 0),
+            glm::dvec3(0, 0, 1)));
+
+        auto rhs = lhs1 * lhs2;
+
         i.setT(t);
         i.setN(interp);
         i.setObject(this);
         i.setBary(alpha, beta, gamma);
         i.setUVCoordinates(glm::dvec2(alpha, beta));
+        i.setBasis(rhs);
+
         return true;
     }
 
