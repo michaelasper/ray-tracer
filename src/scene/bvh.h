@@ -20,9 +20,9 @@ class BVH {
 
     struct BVHBuildEntry {
         // If non-zero then this is the index of the parent. (used in offsets)
-        uint32_t parent;
         // The range of objects in the object list covered by this node.
         uint32_t start, end;
+        uint32_t parent;
     };
 
     struct BVHTraversal {

@@ -1,6 +1,8 @@
 #include "bvh.h"
 #include <stack>
 
+#include <fstream>
+#include <iostream>
 #define EPSILON -9e9
 
 bool BVH::getIntersection(const ray& _r, const isect& _i) {
@@ -63,10 +65,9 @@ bool BVH::getIntersection(const ray& _r, const isect& _i) {
 void BVH::construct() {
     for (auto iter = scene->beginObjects(); iter != scene->endObjects();
          iter++) {
-        auto* obj = iter->get();
+        auto obj = iter->get();
         objects.push_back(obj);
     }
-
     std::stack<BVHBuildEntry> BVHstack;
 
     const uint32_t Untouched = 0xffffffff;
@@ -83,26 +84,25 @@ void BVH::construct() {
         BVHBuildEntry& bnode = BVHstack.top();
         BVHstack.pop();
 
-        uint32_t nPrims = bnode.end - bnode.start;
-
         this->size++;
 
         node.start = bnode.start;
-        node.nPrims = nPrims;
+        node.nPrims = bnode.end - bnode.start;
+        ;
         node.rightOffset = Untouched;
 
-        auto bb = objects[bnode.start]->getBoundingBox();
-        auto bc = BoundingBox(bb.getCenter(), bb.getCenter());
+        BoundingBox bb(objects[node.start]->getBoundingBox());
+        BoundingBox bc(BoundingBox(bb.getCenter(), bb.getCenter()));
 
-        for (uint32_t p = bnode.start + 1; p < bnode.end; ++p) {
-            auto temp = objects[bnode.start]->getBoundingBox();
+        for (uint32_t p = node.start + 1; p < bnode.end; ++p) {
+            auto temp = objects[node.start]->getBoundingBox();
             bb.merge(temp);
             bc.merge(BoundingBox(temp.getCenter(), temp.getCenter()));
         }
 
         node.bbox = &bb;
 
-        if (nPrims <= leaf_size) {
+        if (node.nPrims <= leaf_size) {
             node.rightOffset = 0;
             leafs++;
         }
