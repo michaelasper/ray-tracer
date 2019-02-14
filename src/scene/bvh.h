@@ -31,7 +31,7 @@ class BVH {
     };
 
     struct BVHFlatNode {
-        BoundingBox* bbox;
+        BoundingBox bbox;
         uint32_t start, nPrims, rightOffset;
     };
 

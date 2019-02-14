@@ -38,8 +38,8 @@ bool BVH::getIntersection(const ray& _r, const isect& _i) {
                 }
             }
         } else {
-            bool hitL = flatTree[node_index + 1].bbox->intersect(r, hit1, hit2);
-            bool hitR = flatTree[node_index + node.rightOffset].bbox->intersect(
+            bool hitL = flatTree[node_index + 1].bbox.intersect(r, hit1, hit2);
+            bool hitR = flatTree[node_index + node.rightOffset].bbox.intersect(
                 r, hit3, hit4);
 
             if (hitL && hitR) {
@@ -102,7 +102,7 @@ void BVH::construct() {
             bc.merge(BoundingBox(temp.getCenter(), temp.getCenter()));
         }
 
-        node.bbox = &bb;
+        node.bbox = bb;
 
         if (node.nPrims <= leaf_size) {
             node.rightOffset = 0;
