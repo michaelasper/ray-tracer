@@ -57,6 +57,7 @@
 ./scene/bbox.h
 ./scene/cubeMap.cpp
 ./scene/ray.h
+./scene/bvh.cc
 ./scene/scene.h
 ./scene/ray.cpp
 ./scene/scene.cpp

@@ -81,10 +81,8 @@ glm::dvec3 TextureMap::getMappedValue(const glm::dvec2& coord) const {
 glm::dvec3 TextureMap::getPixelAt(int x, int y) const {
     glm::dvec3 pixelColor(0.0, 0.0, 0.0);
 
-    if (x < 0 || x >= this->getWidth())
-        return getPixelAt(x % this->getWidth(), y);
-    if (y < 0 || y >= this->getHeight())
-        return getPixelAt(x, y % this->getHeight());
+    if (x < 0 || x >= this->getWidth()) return pixelColor;
+    if (y < 0 || y >= this->getHeight()) return pixelColor;
 
     int offset = x + y * width;
 

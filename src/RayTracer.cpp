@@ -248,6 +248,7 @@ void RayTracer::traceSetup(int w, int h) {
 
     // YOUR CODE HERE
     // FIXME: Additional initializations
+    scene->buildBVH();
 }
 
 /*

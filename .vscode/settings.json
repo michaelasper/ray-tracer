@@ -68,6 +68,7 @@
         "valarray": "cpp",
         "vector": "cpp",
         "cfenv": "cpp",
-        "random": "cpp"
+        "random": "cpp",
+        "stack": "cpp"
     }
 }
