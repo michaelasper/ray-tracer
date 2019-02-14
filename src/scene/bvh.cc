@@ -10,7 +10,10 @@ bool BVH::getIntersection(const ray& _r, const isect& _i) {
     isect i(_i);
     uint32_t close, other;
 
-    double* hits = new double[4];
+    double hit1 = 0;
+    double hit2 = 0;
+    double hit3 = 0;
+    double hit4 = 0;
 
     std::stack<BVHTraversal> s;
     s.push(BVHTraversal{0, EPSILON});
@@ -35,26 +38,25 @@ bool BVH::getIntersection(const ray& _r, const isect& _i) {
                 }
             }
         } else {
-            bool hitL =
-                flatTree[node_index + 1].bbox->intersect(r, *hits, *(hits + 1));
+            bool hitL = flatTree[node_index + 1].bbox->intersect(r, hit1, hit2);
             bool hitR = flatTree[node_index + node.rightOffset].bbox->intersect(
-                r, *(hits + 2), *(hits + 3));
+                r, hit3, hit4);
 
             if (hitL && hitR) {
                 close = node_index + 1;
                 other = node_index + node.rightOffset;
-                if (hits[2] < hits[0]) {
-                    std::swap(hits[0], hits[2]);
-                    std::swap(hits[1], hits[3]);
+                if (hit3 < hit1) {
+                    std::swap(hit1, hit3);
+                    std::swap(hit2, hit4);
                     std::swap(close, other);
                 }
-                s.push(BVHTraversal{other, hits[2]});
-                s.push(BVHTraversal{close, hits[0]});
+                s.push(BVHTraversal{other, hit3});
+                s.push(BVHTraversal{close, hit1});
             } else if (hitL) {
-                s.push(BVHTraversal{static_cast<uint32_t>(node_index + 1),
-                                    hits[0]});
+                s.push(
+                    BVHTraversal{static_cast<uint32_t>(node_index + 1), hit1});
             } else if (hitR) {
-                s.push(BVHTraversal{node_index + node.rightOffset, hits[2]});
+                s.push(BVHTraversal{node_index + node.rightOffset, hit3});
             }
         }
     }
