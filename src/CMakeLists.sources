@@ -21,6 +21,8 @@
 ./SceneObjects/Box.cpp
 ./SceneObjects/Sphere.h
 ./SceneObjects/Cylinder.h
+./SceneObjects/Quadric.cpp
+./SceneObjects/Quadric.h
 ./ui/debuggingWindow.fl
 ./ui/ModelerCamera.h
 ./ui/CommandLineUI.h

@@ -56,6 +56,7 @@ string getNameForToken( const SYMBOL kind )
     tokenNames[ CIRCLE ]            = "circle";
     tokenNames[ CYLINDER ]          = "cylinder";
     tokenNames[ CONE ]              = "cone";
+    tokenNames [ QUADRIC ]          = "quadric";
     tokenNames[ TORUS ]             = "torus";
     tokenNames[ TRIMESH ]           = "trimesh";
     tokenNames[ POSITION ]          = "position";
@@ -162,6 +163,7 @@ SYMBOL lookupReservedWord(const string& ident) {
     reservedWords["circle"] = CIRCLE;
     reservedWords["top_radius"] = TOP_RADIUS;
     reservedWords["torus"] = TORUS;
+    reservedWords["quadric"] = QUADRIC;
     reservedWords["transform"] = TRANSFORM;
     reservedWords["translate"] = TRANSLATE;
     reservedWords["transmissive"] = TRANSMISSIVE;

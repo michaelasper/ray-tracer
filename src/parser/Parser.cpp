@@ -53,6 +53,7 @@ Scene* Parser::parseScene()
       case CIRCLE:
       case CYLINDER:
       case CONE:
+      case QUADRIC:
       case TORUS:
       case TRIMESH:
       case TRANSLATE:
@@ -167,6 +168,7 @@ void Parser::parseTransformableElement( Scene* scene, TransformNode* transform, 
       case CIRCLE:
       case CYLINDER:
       case CONE:
+      case QUADRIC:
       case TORUS:
       case TRIMESH:
       case TRANSLATE:
@@ -199,6 +201,7 @@ void Parser::parseGroup(Scene* scene, TransformNode* transform, const Material& 
       case CIRCLE:
       case CYLINDER:
       case CONE:
+      case QUADRIC:
       case TORUS:
       case TRIMESH:
       case TRANSLATE:
@@ -245,6 +248,9 @@ void Parser::parseGeometry(Scene* scene, TransformNode* transform, const Materia
       return;
     case CONE:
       parseCone(scene, transform, mat);
+      return;
+    case QUADRIC:
+      parseQuadric(scene, transform, mat);
       return;
     case TORUS:
       parseTorus(scene, transform, mat);
@@ -589,6 +595,56 @@ void Parser::parseCone(Scene* scene, TransformNode* transform, const Material& m
         return;
       default:
         throw SyntaxErrorException( "Expected: cone attributes", _tokenizer );
+    }
+  }
+}
+
+void Parser::parseQuadric(Scene* scene, TransformNode* transform, const Material& mat)
+{
+  _tokenizer.Read( QUADRIC );
+  _tokenizer.Read( LBRACE );
+
+  Quadric* quadric;
+  Material* newMat = 0;
+
+  //double bottomRadius = 1.0;
+  //double topRadius = 0.0;
+  //double height = 1.0;
+  //bool capped = true;				// Capped by default
+
+  for( ;; )
+  {
+    const Token* t = _tokenizer.Peek();
+
+    switch( t->kind() )
+    {
+      case MATERIAL:
+        delete newMat;
+        newMat = parseMaterialExpression( scene, mat );
+        break;
+      case NAME:
+         parseIdentExpression();
+         break;
+      //case CAPPED:
+      //  capped = parseBooleanExpression();
+      //  break;
+      //case BOTTOM_RADIUS:
+      //  bottomRadius = parseScalarExpression();
+      //  break;
+      //case TOP_RADIUS:
+      //  topRadius = parseScalarExpression();
+      //  break;
+      //case HEIGHT:
+      //  height = parseScalarExpression();
+      //  break;
+      case RBRACE:
+        _tokenizer.Read( RBRACE );
+        quadric = new Quadric(scene, newMat ? newMat : new Material(mat));
+        quadric->setTransform( transform );
+        scene->add( quadric );
+        return;
+      default:
+        throw SyntaxErrorException( "Expected: quadric attributes", _tokenizer );
     }
   }
 }

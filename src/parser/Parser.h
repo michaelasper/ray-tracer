@@ -23,6 +23,7 @@
 #include "../SceneObjects/Circle.h"
 #include "../SceneObjects/Torus.h"
 #include "../SceneObjects/trimesh.h"
+#include "../SceneObjects/Quadric.h"
 
 typedef std::map<string,Material> mmap;
 
@@ -72,6 +73,7 @@ private:
     void      parseSquare(Scene* scene, TransformNode* transform, const Material& mat);
     void      parseCircle(Scene* scene, TransformNode* transform, const Material& mat);
     void      parseTorus(Scene* scene, TransformNode* transform, const Material& mat);
+    void      parseQuadric(Scene* scene, TransformNode* transform, const Material& mat);
     void      parseCylinder(Scene* scene, TransformNode* transform, const Material& mat);
     void      parseCone(Scene* scene, TransformNode* transform, const Material& mat);
     void      parseTrimesh(Scene* scene, TransformNode* transform, const Material& mat);

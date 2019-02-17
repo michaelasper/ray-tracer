@@ -155,8 +155,9 @@ glm::dvec3 RayTracer::traceRay(ray& r, const glm::dvec3& thresh, int depth,
                                        std::pow(m.kt(i)[2], newT));
 
                 colorC += temp;
-        }
 
+            }
+        }
     } else {
         colorC = glm::dvec3(0.0, 0.0, 0.0);
     }

@@ -56,6 +56,7 @@ enum SYMBOL {
   CIRCLE,
   CYLINDER,
   CONE,
+  QUADRIC,
   TORUS,
   TRIMESH,  
 

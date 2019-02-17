@@ -25,10 +25,10 @@ point_light {
 			specular = (1,1,0);
 			shininess = 64;
 		} 
-		
-scale(1.0,
-	rotate(-.75,-.5,-.5,-.75,
-		torus { 
-		}))
+scale(0.5,
+	quadric { 
+	})
+rotate(-.75,-.5,-.5,-.75,
+scale(0.5, quadric{}));
 
 
