@@ -14,6 +14,7 @@ class BoundingBox {
    public:
     BoundingBox();
     BoundingBox(glm::dvec3 bMin, glm::dvec3 bMax);
+    BoundingBox(glm::dvec3 center);
 
     glm::dvec3 getMin() const { return bmin; }
     glm::dvec3 getMax() const { return bmax; }

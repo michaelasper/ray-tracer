@@ -7,6 +7,8 @@
 #include "ray.h"
 #include "scene.h"
 
+#define EPSILON 9999999.0
+
 class Geometry;
 class Scene;
 class MaterialSceneObject;
@@ -22,6 +24,11 @@ struct BVHStackItem {
     int parent, start, end;
 };
 
+struct BVHTraversalItem {
+    int i;
+    double min_t;
+};
+
 class BVH {
    public:
     BVH(const Scene* scene) { this->scene = scene; }
@@ -29,6 +36,9 @@ class BVH {
     bool getIntersection(ray& r, isect& i) const;
 
    private:
+    int size;
+    int leafs;
     const Scene* scene;
     std::vector<Geometry*> objects;
+    std::vector<BVHNode> flatTree;
 };
