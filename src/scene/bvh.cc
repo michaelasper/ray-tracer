@@ -118,7 +118,7 @@ void BVH::construct() {
 
         node.box = bb;
 
-        std::cout << bb.volume() << std::endl;
+        // std::cout << bb.volume() << std::endl;
 
         if (prims <= 1) {
             node.offset = 0;
@@ -172,5 +172,5 @@ void BVH::construct() {
     flatTree.resize(size);
     for (int i = 0; i < size; i++) flatTree[i] = nodes[i];
 
-    std::cout << "objects: " << flatTree.size() << std::endl;
+    // std::cout << "objects: " << flatTree.size() << std::endl;
 }
