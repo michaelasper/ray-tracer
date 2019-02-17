@@ -42,8 +42,8 @@ class BVH {
     std::vector<Geometry*> objects;
 
     Scene* scene;
-    BVH(Scene* scene) : scene(scene), size(0), leaf_size(4), leafs(0) {
-        this->root = NULL;
+    BVH(Scene* scene)
+        : scene(scene), size(0), leaf_size(4), leafs(0), flatTree(NULL) {
         construct();
     };
 
