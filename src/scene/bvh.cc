@@ -39,6 +39,7 @@ bool BVH::getIntersection(const ray& _r, const isect& _i) {
             }
         } else {
             bool hitL = flatTree[node_index + 1].bbox.intersect(r, hit1, hit2);
+
             bool hitR = flatTree[node_index + node.rightOffset].bbox.intersect(
                 r, hit3, hit4);
 
@@ -94,10 +95,10 @@ void BVH::construct() {
         node.rightOffset = Untouched;
 
         BoundingBox bb(objects[node.start]->getBoundingBox());
-        BoundingBox bc(BoundingBox(bb.getCenter(), bb.getCenter()));
+        BoundingBox bc(bb.getCenter(), bb.getCenter());
 
         for (uint32_t p = node.start + 1; p < bnode.end; ++p) {
-            auto temp = objects[node.start]->getBoundingBox();
+            auto temp = objects[p]->getBoundingBox();
             bb.merge(temp);
             bc.merge(BoundingBox(temp.getCenter(), temp.getCenter()));
         }
