@@ -247,6 +247,7 @@ class Scene {
     // This is the total amount of ambient light in the scene
     // (used as the I_a in the Phong shading model)
     glm::dvec3 ambientIntensity;
+    bool treeBuilt;
 
     typedef std::map<std::string, std::unique_ptr<TextureMap>> tmap;
     tmap textureCache;

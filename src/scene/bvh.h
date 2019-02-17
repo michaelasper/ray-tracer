@@ -1,5 +1,8 @@
+
 #pragma once
 
+#include <iostream>
+#include <vector>
 #include "bbox.h"
 #include "ray.h"
 #include "scene.h"
@@ -10,44 +13,22 @@ class MaterialSceneObject;
 class Trimesh;
 class TrimeshFace;
 
+struct BVHNode {
+    BoundingBox box;
+    int start, prims, offset;
+};
+
+struct BVHStackItem {
+    int parent, start, end;
+};
+
 class BVH {
-   private:
-    struct node {
-        Geometry* box;
-        node* left;
-        node* right;
-    };
-
-    struct BVHBuildEntry {
-        // If non-zero then this is the index of the parent. (used in offsets)
-        // The range of objects in the object list covered by this node.
-        uint32_t start, end;
-        uint32_t parent;
-    };
-
-    struct BVHTraversal {
-        uint32_t i;    // Node
-        double min_t;  // Minimum hit time for this node.
-    };
-
-    struct BVHFlatNode {
-        BoundingBox bbox;
-        uint32_t start, nPrims, rightOffset;
-    };
-
    public:
-    node* root;
-    uint32_t size, leaf_size, leafs;
-    BVHFlatNode* flatTree;
-    std::vector<Geometry*> objects;
-
-    Scene* scene;
-    BVH(Scene* scene)
-        : scene(scene), size(0), leaf_size(4), leafs(0), flatTree(NULL) {
-        construct();
-    };
-
+    BVH(const Scene* scene) { this->scene = scene; }
     void construct();
+    bool getIntersection(ray& r, isect& i) const;
 
-    bool getIntersection(const ray& _r, const isect& _i);
+   private:
+    const Scene* scene;
+    std::vector<Geometry*> objects;
 };

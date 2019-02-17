@@ -93,7 +93,7 @@ void Geometry::ComputeBoundingBox() {
     bounds.setMin(glm::dvec3(newMin));
 }
 
-Scene::Scene() {}
+Scene::Scene() { treeBuilt = false; }
 
 Scene::~Scene() {}
 
@@ -104,8 +104,11 @@ void Scene::add(Geometry* obj) {
 }
 
 void Scene::buildBVH() {
-    bvh = new BVH(this);
-    bvh->construct();
+    if (!treeBuilt) {
+        bvh = new BVH(this);
+        bvh->construct();
+        treeBuilt = true;
+    }
 }
 
 void Scene::add(Light* light) { lights.emplace_back(light); }
