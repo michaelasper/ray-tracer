@@ -8,11 +8,10 @@
   doing something wrong.
 */
 
-#include <string>
 #include "buffer.h"
+#include <string>
 
 // #include "../parser/Parser.h"
-
 
 //////////////////////////////////////////////////////////////////////////
 //
@@ -22,18 +21,15 @@
 // to read files.
 //
 
-Buffer::Buffer(istream& is, bool printChars, bool printLines)
-  : inStream( is )
-{ 
+Buffer::Buffer(istream& is, bool printChars, bool printLines) : inStream(is) {
     PositionInCurrentLine = Line.begin();
-    LineNumber            = 0;
-    ColNumber             = 0;
-    LastPrintedLine       = 0;
-    
+    LineNumber = 0;
+    ColNumber = 0;
+    LastPrintedLine = 0;
+
     _printChars = printChars;
     _printLines = printLines;
 }
-
 
 //////////////////////////////////////////////////////////////////////////
 //
@@ -43,36 +39,34 @@ Buffer::Buffer(istream& is, bool printChars, bool printLines)
 //
 
 char Buffer::GetCh() {
-  if (!inStream) {
-    return '\0';
-  }
-
-  // advance position
-  if(!Line.empty() && PositionInCurrentLine != Line.end()) {
-	  PositionInCurrentLine++;
-	  ColNumber++;
-  }
-
-  while (PositionInCurrentLine == Line.end() || Line.empty()) {
-    // need to read another line of input from the file
-
-    GetLine();
     if (!inStream) {
-      return '\0';
+        return '\0';
     }
-  }
 
+    // advance position
+    if (!Line.empty() && PositionInCurrentLine != Line.end()) {
+        PositionInCurrentLine++;
+        ColNumber++;
+    }
 
-  // extract character from line buffer
-  char CurrentCh = *PositionInCurrentLine;
+    while (PositionInCurrentLine == Line.end() || Line.empty()) {
+        // need to read another line of input from the file
 
-  if (_printChars) {
-    std::cout << "Read character `" << CurrentCh << "'" << std::endl;
-  }
+        GetLine();
+        if (!inStream) {
+            return '\0';
+        }
+    }
 
-  return CurrentCh;
+    // extract character from line buffer
+    char CurrentCh = *PositionInCurrentLine;
+
+    if (_printChars) {
+        std::cout << "Read character `" << CurrentCh << "'" << std::endl;
+    }
+
+    return CurrentCh;
 }
-
 
 //////////////////////////////////////////////////////////////////////////
 //
@@ -89,16 +83,15 @@ char Buffer::GetCh() {
 //
 
 void Buffer::GetLine() {
-  std::getline(inStream, Line);
-  Line.append( "\n" ); // because iostreams strip out the end-of-line char
-  PositionInCurrentLine = Line.begin();
+    std::getline(inStream, Line);
+    Line.append("\n");  // because iostreams strip out the end-of-line char
+    PositionInCurrentLine = Line.begin();
 
-  ColNumber = 0;
-  LineNumber ++;
+    ColNumber = 0;
+    LineNumber++;
 
-  if (_printLines) PrintLine( std::cout );
+    if (_printLines) PrintLine(std::cout);
 }
-
 
 //////////////////////////////////////////////////////////////////////////
 //
@@ -107,9 +100,9 @@ void Buffer::GetLine() {
 //   This method displays the current line on the screen.
 //
 
-void Buffer::PrintLine( ostream& out ) const {
-  if (LineNumber > LastPrintedLine) {
-    out << "# " << Line << std::endl;
-    LastPrintedLine = LineNumber;
-  }
+void Buffer::PrintLine(ostream& out) const {
+    if (LineNumber > LastPrintedLine) {
+        out << "# " << Line << std::endl;
+        LastPrintedLine = LineNumber;
+    }
 }
