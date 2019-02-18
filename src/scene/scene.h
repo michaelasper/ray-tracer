@@ -136,7 +136,7 @@ class Geometry : public SceneElement {
     glm::dvec3 getNormal() { return glm::dvec3(1.0, 0.0, 0.0); }
 
     virtual void ComputeBoundingBox();
-
+    bool isTri();
     // default method for ComputeLocalBoundingBox returns a bogus bounding
     // box;
     // this should be overridden if hasBoundingBoxCapability() is true.

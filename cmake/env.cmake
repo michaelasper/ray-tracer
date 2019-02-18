@@ -7,7 +7,7 @@ set(EXECUTABLE_OUTPUT_PATH ${PROJECT_BINARY_DIR}/bin)
 # Flags
 #set(CMAKE_CXX_FLAGS "--std=c++14 -g -fmax-errors=1 -O3")
 IF (NOT WIN32)
-set(CMAKE_CXX_FLAGS "--std=c++14 -g -O0")
+set(CMAKE_CXX_FLAGS "--std=c++14 -g -O3")
 ENDIF ()
 
 # Packages

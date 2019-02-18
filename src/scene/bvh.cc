@@ -1,8 +1,9 @@
 #include "bvh.h"
 #include <stack>
+#include "../SceneObjects/trimesh.h"
 
 bool BVH::getIntersection(ray& r, isect& i) const {
-    if (size == 0) false;
+    if (size == 0) return false;
 
     double threshold = EPSILON;
     std::stack<BVHTraversalItem> stack;
@@ -24,7 +25,7 @@ bool BVH::getIntersection(ray& r, isect& i) const {
             for (int j = 0; j < node.prims; j++) {
                 const Geometry* obj = objects[node.start + j];
                 isect i2;
-                if (obj->intersect(r, i2) && i2.getT() < t) {
+                if (obj->intersect(r, i2) && i2.getT() < threshold) {
                     i = i2;
                     threshold = i2.getT();
                 }
@@ -69,8 +70,16 @@ void BVH::construct() {
     for (auto iter = scene->beginObjects(); iter != scene->endObjects();
          iter++) {
         Geometry* geo = iter->get();
-        objects.push_back(geo);
-        // }
+        if (geo->isTri()) {
+            Trimesh* trimesh = (Trimesh*)geo;
+            for (TrimeshFace* face : trimesh->faces) {
+                face->ComputeBoundingBox();
+                objects.push_back((Geometry*)face);
+            }
+        } else {
+            // geo->ComputeBoundingBox();
+            objects.push_back(geo);
+        }
     }
 
     // std::cout << "objects: " << objects.size() << std::endl;
@@ -120,7 +129,7 @@ void BVH::construct() {
 
         // std::cout << bb.volume() << std::endl;
 
-        if (prims <= 1) {
+        if (prims <= 4) {
             node.offset = 0;
             leafs++;
         }

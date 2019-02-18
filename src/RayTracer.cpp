@@ -264,6 +264,7 @@ void RayTracer::traceSetup(int w, int h) {
 void RayTracer::traceImage(int w, int h) {
     // Always call traceSetup before rendering anything.
     // traceSetup(w, h);
+#pragma omp parallel for schedule(dynamic)
 
     traceSetup(w, h);
     for (int i = 0; i < w; i++) {

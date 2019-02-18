@@ -20,7 +20,7 @@ void Trimesh::addVertex(const glm::dvec3& v) { vertices.emplace_back(v); }
 void Trimesh::addMaterial(Material* m) { materials.emplace_back(m); }
 
 void Trimesh::addNormal(const glm::dvec3& n) { normals.emplace_back(n); }
-
+bool Trimesh::isTri() { return true; }
 // Returns false if the vertices a,b,c don't all exist
 bool Trimesh::addFace(int a, int b, int c) {
     int vcnt = vertices.size();

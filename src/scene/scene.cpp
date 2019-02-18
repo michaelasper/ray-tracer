@@ -40,6 +40,8 @@ bool Geometry::intersect(ray& r, isect& i) const {
     return rtrn;
 }
 
+bool Geometry::isTri() { return false; }
+
 bool Geometry::hasBoundingBoxCapability() const {
     // by default, primitives do not have to specify a bounding box.
     // If this method returns true for a primitive, then either the
@@ -117,7 +119,7 @@ void Scene::add(Light* light) { lights.emplace_back(light); }
 // intersection through the reference parameter.
 bool Scene::intersect(ray& r, isect& i) const {
     bool temp = bvh->getIntersection(r, i);
-    std::cout << temp << std::endl;
+    // std::cout << temp << std::endl;
     if (TraceUI::m_debug)
         intersectCache.push_back(std::make_pair(new ray(r), new isect(i)));
     return temp;

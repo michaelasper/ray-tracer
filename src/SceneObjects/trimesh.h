@@ -17,6 +17,7 @@ class TrimeshFace;
 
 class Trimesh : public MaterialSceneObject {
     friend class TrimeshFace;
+    friend class BVH;
     typedef std::vector<glm::dvec3> Normals;
     typedef std::vector<glm::dvec3> Vertices;
     typedef std::vector<TrimeshFace *> Faces;
@@ -50,7 +51,7 @@ class Trimesh : public MaterialSceneObject {
     bool addFace(int a, int b, int c);
 
     const char *doubleCheck();
-
+    bool isTri();
     void generateNormals();
 
     bool hasBoundingBoxCapability() const { return true; }
