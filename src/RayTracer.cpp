@@ -55,6 +55,8 @@ glm::dvec3 RayTracer::trace(double x, double y) {
 
 glm::dvec3 RayTracer::tracePixel(int i, int j) {
     glm::dvec3 col(0, 0, 0);
+    glm::dvec3 col1(0, 0, 0);
+    glm::dvec3 col2(0, 0, 0);
 
     if (!sceneLoaded()) return col;
 
@@ -62,7 +64,19 @@ glm::dvec3 RayTracer::tracePixel(int i, int j) {
     double y = double(j) / double(buffer_height);
 
     unsigned char* pixel = buffer.data() + (i + j * buffer_width) * 3;
-    col = trace(x, y);
+    col1 = trace(x, y);
+    scene->getCamera().setLook(glm::dvec3(-0.0775, -0.459697, -0.884048),
+                               glm::dvec3(-0.0897202, 0.887126, -0.452723));
+    col2 = trace(x, y);
+    scene->getCamera().setLook(glm::dvec3(-0.0925, -0.459697, -0.884048),
+                               glm::dvec3(-0.0897202, 0.887126, -0.452723));
+
+    glm::mat3 red(glm::dvec3(.299, 0, 0), glm::dvec3(.587, 0, 0),
+                  glm::dvec3(.114, 0, 0));
+    glm::mat3 blue(glm::dvec3(0, .299, .299), glm::dvec3(0, .587, .587),
+                   glm::dvec3(0, .114, .114));
+    col = red * col1 + blue * col2;
+    // col = red * col1;
 
     pixel[0] = (int)(255.0 * col[0]);
     pixel[1] = (int)(255.0 * col[1]);
