@@ -63,13 +63,18 @@ glm::dvec3 RayTracer::tracePixel(int i, int j) {
     double x = double(i) / double(buffer_width);
     double y = double(j) / double(buffer_height);
 
+    glm::dvec3 up(scene->getCamera().getUp());
+    glm::dvec3 view(scene->getCamera().getView());
+    glm::dvec3 offset(0.01, 0.000, 0.000);
+    // std::cout << view - offset << std::endl;
+    // std::cout << view + offset << std::endl;
+    // std::cout << up << std::endl;
     unsigned char* pixel = buffer.data() + (i + j * buffer_width) * 3;
+
     col1 = trace(x, y);
-    scene->getCamera().setLook(glm::dvec3(-0.0775, -0.459697, -0.884048),
-                               glm::dvec3(-0.0897202, 0.887126, -0.452723));
+    scene->getCamera().setLook(view - offset, up);
     col2 = trace(x, y);
-    scene->getCamera().setLook(glm::dvec3(-0.0925, -0.459697, -0.884048),
-                               glm::dvec3(-0.0897202, 0.887126, -0.452723));
+    scene->getCamera().setLook(view + offset, up);
 
     glm::mat3 red(glm::dvec3(.299, 0, 0), glm::dvec3(.587, 0, 0),
                   glm::dvec3(.114, 0, 0));
