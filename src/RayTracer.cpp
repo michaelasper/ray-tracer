@@ -42,8 +42,13 @@ glm::dvec3 RayTracer::trace(double x, double y) {
           ray::VISIBILITY);
     scene->getCamera().rayThrough(x, y, r);
     double dummy;
-    glm::dvec3 ret =
-        traceRay(r, glm::dvec3(1.0, 1.0, 1.0), traceUI->getDepth(), dummy);
+    glm::dvec3 ret;
+    if (traceUI->isThreshold()) {
+        // std::cout << "ran" << std::endl;
+        ret = traceRay(r, traceUI->getThreshold(), traceUI->getDepth(), dummy);
+    } else {
+        ret = traceRay(r, 0.0, traceUI->getDepth(), dummy);
+    }
     ret = glm::clamp(ret, 0.0, 1.0);
     return ret;
 }
@@ -88,8 +93,7 @@ ray reflectDirection(ray& r, const isect& i) {
                ray::REFLECTION);
 }
 
-glm::dvec3 RayTracer::traceRay(ray& r, const glm::dvec3& thresh, int depth,
-                               double& t) {
+glm::dvec3 RayTracer::traceRay(ray& r, double thresh, int depth, double& t) {
     isect i;
     glm::dvec3 colorC;
 
@@ -98,6 +102,9 @@ glm::dvec3 RayTracer::traceRay(ray& r, const glm::dvec3& thresh, int depth,
     if (scene->intersect(r, i)) {
         const Material& m = i.getMaterial();
         colorC = m.shade(scene.get(), r, i);
+        if (traceUI->isThreshold() && glm::dot(colorC, colorC) < thresh)
+            return colorC;
+
         t = i.getT();
         bool inside = glm::dot(-r.getDirection(), i.getN()) < 0;
         // Reflections
@@ -264,7 +271,7 @@ void RayTracer::traceSetup(int w, int h) {
 void RayTracer::traceImage(int w, int h) {
     // Always call traceSetup before rendering anything.
     // traceSetup(w, h);
-#pragma omp parallel for schedule(dynamic)
+    // #pragma omp parallel for schedule(dynamic)
 
     traceSetup(w, h);
     for (int i = 0; i < w; i++) {
