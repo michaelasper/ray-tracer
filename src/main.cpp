@@ -18,23 +18,22 @@ int TraceUI::rayCount[MAX_THREADS];
 //
 // Graphics mode will be substantially slower than text mode because of
 // event handling overhead.
-int main(int argc, char** argv)
-{
-	if (argc != 1) {
-		// text mode
-		traceUI = new CommandLineUI(argc, argv);
-	} else {
+int main(int argc, char** argv) {
+    if (argc != 1) {
+        // text mode
+        traceUI = new CommandLineUI(argc, argv);
+    } else {
 #ifdef COMMAND_LINE_ONLY
-		// still text mode
-		traceUI = new CommandLineUI(argc, argv);
+        // still text mode
+        traceUI = new CommandLineUI(argc, argv);
 #else
-		// graphics mode
-		traceUI = new GraphicalUI();
+        // graphics mode
+        traceUI = new GraphicalUI();
 #endif
-	}
+    }
 
-	theRayTracer = new RayTracer();
+    theRayTracer = new RayTracer();
 
-	traceUI->setRayTracer(theRayTracer);
-	return traceUI->run();
+    traceUI->setRayTracer(theRayTracer);
+    return traceUI->run();
 }

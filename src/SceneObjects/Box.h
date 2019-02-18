@@ -4,25 +4,22 @@
 #include "../scene/scene.h"
 
 class Box : public MaterialSceneObject {
-public:
-	Box( Scene *scene, Material *mat )
-		: MaterialSceneObject( scene, mat )
-	{
-	}
+   public:
+    Box(Scene* scene, Material* mat) : MaterialSceneObject(scene, mat) {}
 
-	virtual bool intersectLocal(ray& r, isect& i ) const;
-	virtual bool hasBoundingBoxCapability() const { return true; }
+    virtual bool intersectLocal(ray& r, isect& i) const;
+    virtual bool hasBoundingBoxCapability() const { return true; }
 
-    virtual BoundingBox ComputeLocalBoundingBox()
-    {
+    virtual BoundingBox ComputeLocalBoundingBox() {
         BoundingBox localbounds;
         localbounds.setMax(glm::dvec3(0.5, 0.5, 0.5));
-		localbounds.setMin(glm::dvec3(-0.5, -0.5, -0.5));
+        localbounds.setMin(glm::dvec3(-0.5, -0.5, -0.5));
         return localbounds;
     }
 
-protected:
-	void glDrawLocal(int quality, bool actualMaterials, bool actualTextures) const;
+   protected:
+    void glDrawLocal(int quality, bool actualMaterials,
+                     bool actualTextures) const;
 };
 
-#endif // __BOX_H__
+#endif  // __BOX_H__

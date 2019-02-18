@@ -2,19 +2,18 @@
 
 #define __TOKENIZER_H__
 
-#include "Token.h"
 #include "../fileio/buffer.h"
+#include "Token.h"
 
-#include <string>
 #include <memory>
+#include <string>
 
 // Needed to correct for annoying "feature" in MSVC's compiler
-#pragma warning (disable: 4786)
+#pragma warning(disable : 4786)
 
-using std::string;
 using std::istream;
+using std::string;
 using std::unique_ptr;
-
 
 /*
    The tokenizer's job is to convert a stream of characters
@@ -30,7 +29,7 @@ using std::unique_ptr;
 */
 
 class Tokenizer {
-  public:
+   public:
     Tokenizer(istream& fp, bool printTokens);
 
     // destructively read & return the next token, skipping over whitespace
@@ -47,7 +46,7 @@ class Tokenizer {
     bool CondRead(SYMBOL expected);
 
     // display the current source line onto the screen.
-    void PrintLine( ostream& out) const { buffer.PrintLine(out); }
+    void PrintLine(ostream& out) const { buffer.PrintLine(out); }
 
     // return the column number/line number of the current token.
     int CurColumn() const { return TokenColumn; }
@@ -57,7 +56,7 @@ class Tokenizer {
     // last phase to be executed
     void ScanProgram();
 
-protected:
+   protected:
     // private methods:
 
     // push the argument token back onto the scanner's token stream;
@@ -65,31 +64,30 @@ protected:
     Token* GetNext();
     void UnGet(Token* t);
 
-    Token* SearchReserved(const string&) const; // Convert ident string into token
+    Token* SearchReserved(
+        const string&) const;  // Convert ident string into token
 
     void GetCh() { CurrentCh = buffer.GetCh(); }
-    bool CondReadCh(char expected);        // consume a character, if it matches
+    bool CondReadCh(char expected);  // consume a character, if it matches
 
-    void SkipWhiteSpace();        // skip spaces, tabs, newlines
+    void SkipWhiteSpace();  // skip spaces, tabs, newlines
 
-    Token* GetPunct();            // scan punctuation token
-    Token* GetScalar();           // scan integer token
-    Token* GetIdent();            // scan identifier token
+    Token* GetPunct();   // scan punctuation token
+    Token* GetScalar();  // scan integer token
+    Token* GetIdent();   // scan identifier token
     Token* GetQuotedIdent();
-
 
     // private data:
 
-    Buffer buffer;                // The file buffer
-    char CurrentCh;               // The current character in the current line
+    Buffer buffer;   // The file buffer
+    char CurrentCh;  // The current character in the current line
 
-    Token* UnGetToken;            // The token that has been "ungot"
+    Token* UnGetToken;  // The token that has been "ungot"
 
-    int TokenColumn;              // The column where the last read token starts,
-                                  // for generating error messages
+    int TokenColumn;  // The column where the last read token starts,
+                      // for generating error messages
 
-    bool _printTokens;            // printing flag
+    bool _printTokens;  // printing flag
 };
 
 #endif
-
