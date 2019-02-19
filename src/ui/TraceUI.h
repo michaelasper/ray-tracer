@@ -110,8 +110,8 @@ class TraceUI {
     int m_3d_mode = 0;
 
     double m_focalDistance = 1;
-    double m_ApSize = 0.05;
-    int m_dDiv = 16;
+    double m_ApSize = 0.3;
+    int m_dDiv = 50;
 
     static int rayCount[MAX_THREADS];  // Ray counter
 
