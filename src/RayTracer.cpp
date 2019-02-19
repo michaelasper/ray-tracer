@@ -71,7 +71,7 @@ glm::dvec3 RayTracer::tracePixel(int i, int j) {
 
     if (traceUI->dddSwitch()) {
         glm::dvec3 eye(scene->getCamera().getEye());
-        glm::dvec3 offset(eye[0] / 8.0, 0.00, 0.00);
+        glm::dvec3 offset(0.2, 0.00, 0.00);
         glm::mat3 red, blue;
         col1 = trace(x, y);
         scene->getCamera().setEye(eye + offset);
