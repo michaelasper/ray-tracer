@@ -76,7 +76,7 @@ glm::dvec3 RayTracer::trace(double x, double y) {
         // this point the focal point for the pixel.
 
         glm::dvec3 focalPointN = -r.getDirection();
-        glm::dvec3 focalPointPos = r.at(3);
+        glm::dvec3 focalPointPos = r.at(focalDistance);
 
         // focal point plane
         double t = glm::dot(focalPointN, r.getDirection());
