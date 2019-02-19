@@ -44,6 +44,7 @@ class TraceUI {
     int getThreads() const { return m_threads; }
     bool aaSwitch() const { return m_antiAlias; }
     bool ssSwitch() const { return m_stochaticAlias; }
+    bool dddSwitch() const { return m_render3d; }
     bool kdSwitch() const { return m_kdTree; }
     bool shadowSw() const { return m_shadows; }
     bool smShadSw() const { return m_smoothshade; }
