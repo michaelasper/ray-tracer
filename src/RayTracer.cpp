@@ -64,24 +64,29 @@ glm::dvec3 RayTracer::tracePixel(int i, int j) {
     double x = double(i) / double(buffer_width);
     double y = double(j) / double(buffer_height);
 
-    glm::dvec3 up(scene->getCamera().getUp());
-    glm::dvec3 view(scene->getCamera().getView());
-    glm::dvec3 offset(0.01, 0.000, 0.000);
     // std::cout << view - offset << std::endl;
     // std::cout << view + offset << std::endl;
     // std::cout << up << std::endl;
     unsigned char* pixel = buffer.data() + (i + j * buffer_width) * 3;
 
-    col1 = trace(x, y);
-    scene->getCamera().setLook(view - offset, up);
-    col2 = trace(x, y);
-    scene->getCamera().setLook(view + offset, up);
+    if (traceUI->dddSwitch()) {
+        glm::dvec3 up(scene->getCamera().getUp());
+        glm::dvec3 view(scene->getCamera().getView());
+        glm::dvec3 offset(0.01, 0.000, 0.000);
 
-    glm::mat3 red(glm::dvec3(.299, 0, 0), glm::dvec3(.587, 0, 0),
-                  glm::dvec3(.114, 0, 0));
-    glm::mat3 blue(glm::dvec3(0, .299, .299), glm::dvec3(0, .587, .587),
-                   glm::dvec3(0, .114, .114));
-    col = red * col1 + blue * col2;
+        col1 = trace(x, y);
+        scene->getCamera().setLook(view - offset, up);
+        col2 = trace(x, y);
+        scene->getCamera().setLook(view + offset, up);
+
+        glm::mat3 red(glm::dvec3(.299, 0, 0), glm::dvec3(.587, 0, 0),
+                      glm::dvec3(.114, 0, 0));
+        glm::mat3 blue(glm::dvec3(0, .299, .299), glm::dvec3(0, .587, .587),
+                       glm::dvec3(0, .114, .114));
+        col = red * col1 + blue * col2;
+    } else {
+        col = trace(x, y);
+    }
     // col = red * col1;
 
     pixel[0] = (int)(255.0 * col[0]);
