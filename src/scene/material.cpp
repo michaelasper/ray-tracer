@@ -62,18 +62,16 @@ glm::dvec3 TextureMap::getMappedValue(const glm::dvec2& coord) const {
     double y = (coord[1] * (this->getHeight() - 1));
 
     double x1 = int(x);
-    double x2 = x1 - floor(x);
+    double x2 = x1 - floor(x1);
     double y1 = int(y);
-    double y2 = y1 - floor(x);
+    double y2 = y1 - floor(y1);
     auto q11 = getPixelAt(x1, y1);
-    auto q21 = getPixelAt(x2, y1);
-    auto q12 = getPixelAt(x1, y2);
-    auto q22 = getPixelAt(x1, y2);
+    auto q21 = getPixelAt(x1 + 1, y1);
+    auto q12 = getPixelAt(x1, y1 + 1);
+    auto q22 = getPixelAt(x1 + 1, y1 + 1);
 
-    // Bilinear interpolation from wikipedia
-    auto color = double(1 / ((x2 - x1) * (y2 - y1))) *
-                 (q11 * (x2 - x) * (y2 - y) + q21 * (x - x1) * (y2 - y) +
-                  q12 * (x2 - x) * (y - y1) + q22 * (x - x1) * (y - y2));
+    auto color = (1 - y2) * ((1 - x2) * q11 + x2 * q21) +
+                 y2 * ((1 - x2) * q12 + x2 * q22);
 
     return color;
 }
