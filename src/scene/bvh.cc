@@ -70,7 +70,7 @@ void BVH::construct() {
     for (auto iter = scene->beginObjects(); iter != scene->endObjects();
          iter++) {
         Geometry* geo = iter->get();
-        if (geo->isTri()) {
+        if (geo->tri) {
             Trimesh* trimesh = (Trimesh*)geo;
             for (TrimeshFace* face : trimesh->faces) {
                 face->ComputeBoundingBox();
@@ -81,8 +81,6 @@ void BVH::construct() {
             objects.push_back(geo);
         }
     }
-
-    // std::cout << "objects: " << objects.size() << std::endl;
 
     // initialize variables
     this->size = 0;
