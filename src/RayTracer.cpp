@@ -50,37 +50,70 @@ glm::dvec3 RayTracer::trace(double x, double y) {
     } else {
         ret = traceRay(r, 0.0, traceUI->getDepth(), dummy);
     }
-
+    // http://cg.skeelogy.com/depth-of-field-using-raytracing/
+    // https://stackoverflow.com/questions/13532947/references-for-depth-of-field-implementation-in-a-raytracer
     if (traceUI->dSwitch()) {
         ray depthRay(r);
-        scene->getCamera().rayThrough(0.5, 0.5, depthRay);
-        glm::dvec3 focalPoint = -r.getDirection();
-        glm::dvec3 focalPointPos = r.at(depthRay);
+        int raySamples = traceUI->getDivs();
+
+        // First, define an aperture: a planar area center on your eye and
+        // parallel to the retina/frame. The bigger the aperture, the more DOF
+        // effect will be evident. Aperture's are typically just circles, in
+        // which case it is easily defined by its radius. Other shapes can lead
+        // to different lighting effects.
+
+        // Also define a "focal distance". I don't think that's actually the
+        // correct term for it, but it's the distance from the eye at which
+        // things will be perfectly in focus.
+
+        double apertureSize = traceUI->getApSize();
+        double focalDistance = traceUI->getFocalD();
+
+        // Start by casting a ray like normal from the eye through the pixel out
+        // into the scene. Instead of intersecting it with objects in the scene,
+        // though, you just want to find the point on the ray for which the
+        // distance from the eye is equal to the selected focal distance. Call
+        // this point the focal point for the pixel.
+
+        glm::dvec3 focalPointN = -r.getDirection();
+        glm::dvec3 focalPointPos = r.at(3);
 
         // focal point plane
-        double t = glm::dot(focalPoint, r.getDirection());
-        t = glm::dot(focalPointPos - r.getPosition(), focalPoint) / t;
+        double t = glm::dot(focalPointN, r.getDirection());
+        t = glm::dot(focalPointPos - r.getPosition(), focalPointN) / t;
         glm::dvec3 dest = r.at(t);
 
-        int div = traceUI->getDivs();
-        double apertureSize = traceUI->getApSize();
-        double focalDist = traceUI->getFocalD();
+        std::uniform_real_distribution<double> distRadius(0, apertureSize / 2);
+        std::uniform_real_distribution<double> distPhi(0,
+                                                       2 * glm::pi<double>());
+        for (int i = 0; i < raySamples; ++i) {
+            // std::cout << "ran" << std::endl;
 
-        for (int i = 0; i < div; ++i) {
-            std::uniform_real_distribution<double> dist(-1.0, 1.0);
-            double x = dist(eng);
-            double y = dist(eng);
+            // Now select a random starting point on the aperture. For a
+            // circular aperture, it's pretty easy, you can select a random
+            // polar angle and a random radius (no greater than the radius of
+            // the aperture). You want a uniform distribution over the entire
+            // aperture, don't try to bias it towards the center or anything.
 
-            if (traceUI->isThreshold()) {
-                // std::cout << "ran" << std::endl;
-                ret += traceRay(depthRay, traceUI->getThreshold(),
-                                traceUI->getDepth(), dummy);
-            } else {
-                ret += traceRay(depthRay, 0.0, traceUI->getDepth(), dummy);
-            }
+            double phi = distPhi(eng);
+            double radius = distRadius(eng);
+
+            glm::dvec3 offVec = (glm::cos(phi) * scene->getCamera().getV() +
+                                 glm::sin(phi) * scene->getCamera().getU()) *
+                                radius;
+
+            r.setPosition(scene->getCamera().getEye() + offVec);
+            r.setDirection(glm::normalize(dest - r.getPosition()));
+
+            // Cast a ray from your selected point on the aperture through the
+            // focal point. Note that it will not necessarily pass through the
+            // same pixel, that's ok.
+
+            ret += traceRay(r, traceUI->getThreshold(), traceUI->getDepth(),
+                            dummy);
         }
 
-        ret /= double(div);
+        ret *= 1.0 / double(raySamples + 1.0);
     }
     ret = glm::clamp(ret, 0.0, 1.0);
     return ret;
