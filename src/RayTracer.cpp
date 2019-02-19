@@ -211,7 +211,9 @@ RayTracer::RayTracer()
       thresh(0),
       buffer_width(0),
       buffer_height(0),
-      m_bBufferReady(false) {}
+      m_bBufferReady(false) {
+    std::mt19937 eng(rd());  // seed the generator
+}
 
 RayTracer::~RayTracer() {}
 
@@ -325,18 +327,18 @@ void RayTracer::traceImage(int w, int h) {
 }
 
 int RayTracer::aaImage() {
-    std::random_device rd;   // obtain a random number from hardware
-    std::mt19937 eng(rd());  // seed the generator
+    // bool ssSwitch = traceUI->ssSwitch();
     for (int i = 0; i < buffer_width; i++) {
         for (int j = 0; j < buffer_height; j++) {
             glm::dvec3 color(0.0, 0.0, 0.0);
             for (int m = 0; m < samples; m++) {
                 for (int n = 0; n < samples; n++) {
-                    double x = double(i * samples + m) /
-                               double(buffer_width * samples);
-                    double y = double(j * samples + n) /
-                               double(buffer_height * samples);
                     if (traceUI->ssSwitch()) {
+                        double x = double(i * samples + m) /
+                                   double(buffer_width * samples);
+                        double y = double(j * samples + n) /
+                                   double(buffer_height * samples);
+                        // std::cout << "ran" << std::endl;
                         // https://www.alanzucconi.com/2015/09/16/how-to-sample-from-a-gaussian-distribution/
                         double dist_min = min(buffer_height * samples,
                                               buffer_width * samples);
@@ -359,9 +361,14 @@ int RayTracer::aaImage() {
                         u2 /= samples;
                         x += u1;
                         y += u2;
+                        color += trace(x, y);
+                    } else {
+                        double x = double(i * samples + m) /
+                                   double(buffer_width * samples);
+                        double y = double(j * samples + n) /
+                                   double(buffer_height * samples);
+                        color += trace(x, y);
                     }
-
-                    color += trace(x, y);
                 }
             }
             color /= (samples * samples);
