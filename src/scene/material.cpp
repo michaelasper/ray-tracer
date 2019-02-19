@@ -62,7 +62,7 @@ glm::dvec3 TextureMap::getMappedValue(const glm::dvec2& coord) const {
     double y = (coord[1] * (this->getHeight() - 1));
 
     double x1 = int(x);
-    double x2 = x1 + 1;
+    double x2 = x2 + 1;
     double y1 = int(y);
     double y2 = y2 + 1;
     auto q11 = getPixelAt(x1, y1);
