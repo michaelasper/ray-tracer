@@ -33,10 +33,13 @@ class TraceUI {
     // accessors:
     int getSize() const { return m_nSize; }
     int getDepth() const { return m_nDepth; }
+    int getDivs() const { return m_dDiv; }
     int getBlockSize() const { return m_nBlockSize; }
     bool isThreshold() const { return m_nThreshold > 0; }
     double getThreshold() const { return (double)m_nThreshold * 0.001; }
     double getAaThreshold() const { return (double)m_nAaThreshold * 0.001; }
+    double getFocalD() const { return m_focalDistance; }
+    double getApSize() const { return m_ApSize; }
     int getSuperSamples() const { return m_nSuperSamples; }
     int getMaxDepth() const { return m_nTreeDepth; }
     int getLeafSize() const { return m_nLeafSize; }
@@ -45,6 +48,7 @@ class TraceUI {
     int get3dMode() const { return m_3d_mode; }
     bool aaSwitch() const { return m_antiAlias; }
     bool ssSwitch() const { return m_stochaticAlias; }
+    bool dSwitch() const { return m_depthOfField; }
     bool dddSwitch() const { return m_render3d; }
     bool kdSwitch() const { return m_kdTree; }
     bool shadowSw() const { return m_shadows; }
@@ -105,6 +109,10 @@ class TraceUI {
     int m_nFilterWidth = 1;  // width of cubemap filter
     int m_3d_mode = 0;
 
+    double m_focalDistance = 1;
+    double m_ApSize = 0.3;
+    int m_dDiv = 50;
+
     static int rayCount[MAX_THREADS];  // Ray counter
 
     // Determines whether or not to show debugging information
@@ -124,6 +132,7 @@ class TraceUI {
         false;  // Enable specular component even seeing through the back of a
                 // translucent object.
     bool m_render3d = false;
+    bool m_depthOfField = false;
 
     std::unique_ptr<CubeMap> cubemap;
 

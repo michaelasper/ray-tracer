@@ -9,10 +9,7 @@ using namespace std;
 Camera::Camera() {
     aspectRatio = 1;
     normalizedHeight = 1;
-    isLookSet = false;
     eye = glm::dvec3(0, 0, 0);
-    up = glm::dvec3(0, 0, 0);
-    view = glm::dvec3(0, 0, 0);
     u = glm::dvec3(1, 0, 0);
     v = glm::dvec3(0, 1, 0);
     look = glm::dvec3(0, 0, -1);
@@ -57,11 +54,6 @@ void Camera::setLook(double r, double i, double j, double k)
 }
 
 void Camera::setLook(const glm::dvec3 &viewDir, const glm::dvec3 &upDir) {
-    if (!isLookSet) {
-        this->view = viewDir;
-        this->up = upDir;
-        isLookSet = true;
-    }
     glm::dvec3 z = -viewDir;          // this is where the z axis should end up
     const glm::dvec3 &y = upDir;      // where the y axis should end up
     glm::dvec3 x = glm::cross(y, z);  // lah,

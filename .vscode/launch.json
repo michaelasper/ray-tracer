@@ -8,7 +8,7 @@
         "type": "cppdbg",
         "request": "launch",
         "program": "${workspaceFolder}/build/bin/ray",
-        "args": ["-r", "5", "${workspaceFolder}/assets/scenes/hitchcock.ray", "output.png"],
+        // "args": ["-f", "3", "-r", "5", "${workspaceFolder}/assets/scenes/polymesh/trimesh1.ray", "output.png"],
         "stopAtEntry": false,
         "cwd": "${workspaceFolder}",
         "environment": [],

@@ -130,6 +130,7 @@ class Geometry : public SceneElement {
    public:
     // intersections performed in the global coordinate space.
     bool intersect(ray& r, isect& i) const;
+    bool tri = false;
 
     virtual bool hasBoundingBoxCapability() const;
     const BoundingBox& getBoundingBox() const { return bounds; }

@@ -36,6 +36,7 @@ class Trimesh : public MaterialSceneObject {
           displayListWithoutMaterials(0) {
         this->transform = transform;
         vertNorms = false;
+        this->tri = true;
     }
 
     bool vertNorms;

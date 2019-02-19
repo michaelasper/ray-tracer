@@ -6,15 +6,42 @@ Daniel Mancia - dam4754
 
 ## Completed Features
 
-* (10 pts) Triangle-Ray Intersection
-* (10 pts) Phong Interpolation of Normals
-* (20 pts) Basic Anti-aliasing
-* (30 pts) Phong shading 
+* (60 pts) BVH
+* (10 pts) Texture Mapping
+* (10 pts) Cube Mapping
+* (5 pts) Adaptive Termination 
+* (5 pts) Stocahstic supersampling
+* (10 pts) New geometry: dedicated torii and general quadrics
+* (20 pts) Depth of field
+* (20 pts) 3D images for viewing with glasses (Anaglyph)
+* (varied pts) Implement different modes of shading: cel shading
 
-## "Completed" Features
 
-* (10 pts) Light attenuation and shadow attenuation
-* (10 pts) Reflection term
-* (10 pts) Refraction term
+### Adaptive Termination
 
-In my opinion, these are I would say completed but there is a slight bug on them since we are very close to passing a few scenes and it's hard to pinpoint. When comparing towards the reference solution, it's very hard to tell a difference basically.
+Use `-z [threshold]`
+
+### Stocahstic supersampling
+
+Use `-f [samples]`
+
+### Geometry supersampling
+
+We have scenes in the quadrics/torus folders
+
+### Depth of field
+
+Use `-q [focalDistance] [aperatureSize]`
+
+### 3D Images
+
+Use `-d [3dmode]`
+
+#### 3D modes:
+
+0. Gray scale
+1. Optimized half color
+
+### Toon shading
+
+Use `-w`
