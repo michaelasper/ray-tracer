@@ -42,6 +42,7 @@ class TraceUI {
     int getLeafSize() const { return m_nLeafSize; }
     int getFilterWidth() const { return m_nFilterWidth; }
     int getThreads() const { return m_threads; }
+    int get3dMode() const { return m_3d_mode; }
     bool aaSwitch() const { return m_antiAlias; }
     bool ssSwitch() const { return m_stochaticAlias; }
     bool dddSwitch() const { return m_render3d; }
