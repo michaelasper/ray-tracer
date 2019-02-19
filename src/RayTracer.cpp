@@ -311,13 +311,6 @@ void RayTracer::traceImage(int w, int h) {
 }
 
 int RayTracer::aaImage() {
-    // YOUR CODE HERE
-    // FIXME: Implement Anti-aliasing here
-    //
-    // TIP: samples and aaThresh have been synchronized with TraceUI by
-    //      RayTracer::traceSetup() function
-    // traceSetup(w, h);
-
     std::random_device rd;   // obtain a random number from hardware
     std::mt19937 eng(rd());  // seed the generator
     for (int i = 0; i < buffer_width; i++) {
@@ -329,29 +322,30 @@ int RayTracer::aaImage() {
                                double(buffer_width * samples);
                     double y = double(j * samples + n) /
                                double(buffer_height * samples);
+                    if (traceUI->ssSwitch()) {
+                        // https://www.alanzucconi.com/2015/09/16/how-to-sample-from-a-gaussian-distribution/
+                        double dist_min = min(buffer_height * samples,
+                                              buffer_width * samples);
+                        std::uniform_real_distribution<double> dist(-1.0, 1.0);
 
-                    // https://www.alanzucconi.com/2015/09/16/how-to-sample-from-a-gaussian-distribution/
-                    double dist_min =
-                        min(buffer_height * samples, buffer_width * samples);
-                    std::uniform_real_distribution<double> dist(-1.0, 1.0);
+                        double u1, u2, s;
+                        do {
+                            u1 = dist(eng);
+                            u2 = dist(eng);
+                            s = u1 * u1 + u2 * u2;
+                        } while (s >= 1.0 || s == 0.0);
 
-                    double u1, u2, s;
-                    do {
-                        u1 = dist(eng);
-                        u2 = dist(eng);
-                        s = u1 * u1 + u2 * u2;
-                    } while (s >= 1.0 || s == 0.0);
+                        s = sqrt((-2.0 * glm::log(s)) / s);
 
-                    s = sqrt((-2.0 * glm::log(s)) / s);
+                        u1 *= s;
 
-                    u1 *= s;
-
-                    u1 *= dist_min;
-                    u1 /= samples;
-                    u2 *= dist_min;
-                    u2 /= samples;
-                    x += u1;
-                    y += u2;
+                        u1 *= dist_min;
+                        u1 /= samples;
+                        u2 *= dist_min;
+                        u2 /= samples;
+                        x += u1;
+                        y += u2;
+                    }
 
                     color += trace(x, y);
                 }
