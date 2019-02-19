@@ -50,6 +50,38 @@ glm::dvec3 RayTracer::trace(double x, double y) {
     } else {
         ret = traceRay(r, 0.0, traceUI->getDepth(), dummy);
     }
+
+    if (traceUI->dSwitch()) {
+        ray depthRay(r);
+        scene->getCamera().rayThrough(0.5, 0.5, depthRay);
+        glm::dvec3 focalPoint = -r.getDirection();
+        glm::dvec3 focalPointPos = r.at(depthRay);
+
+        // focal point plane
+        double t = glm::dot(focalPoint, r.getDirection());
+        t = glm::dot(focalPointPos - r.getPosition(), focalPoint) / t;
+        glm::dvec3 dest = r.at(t);
+
+        int div = traceUI->getDivs();
+        double apertureSize = traceUI->getApSize();
+        double focalDist = traceUI->getFocalD();
+
+        for (int i = 0; i < div; ++i) {
+            std::uniform_real_distribution<double> dist(-1.0, 1.0);
+            double x = dist(eng);
+            double y = dist(eng);
+
+            if (traceUI->isThreshold()) {
+                // std::cout << "ran" << std::endl;
+                ret += traceRay(depthRay, traceUI->getThreshold(),
+                                traceUI->getDepth(), dummy);
+            } else {
+                ret += traceRay(depthRay, 0.0, traceUI->getDepth(), dummy);
+            }
+        }
+
+        ret /= double(div);
+    }
     ret = glm::clamp(ret, 0.0, 1.0);
     return ret;
 }
