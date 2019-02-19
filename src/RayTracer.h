@@ -8,6 +8,7 @@
 #include <time.h>
 #include <glm/vec3.hpp>
 #include <queue>
+#include <random>
 #include <thread>
 #include "scene/cubeMap.h"
 #include "scene/ray.h"
@@ -54,7 +55,8 @@ class RayTracer {
 
    private:
     glm::dvec3 trace(double x, double y);
-
+    std::mt19937 eng;
+    std::random_device rd;
     std::vector<unsigned char> buffer;
     int buffer_width, buffer_height;
     int bufferSize;
