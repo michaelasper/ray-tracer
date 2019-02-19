@@ -70,14 +70,13 @@ glm::dvec3 RayTracer::tracePixel(int i, int j) {
     unsigned char* pixel = buffer.data() + (i + j * buffer_width) * 3;
 
     if (traceUI->dddSwitch()) {
-        glm::dvec3 up(scene->getCamera().getUp());
-        glm::dvec3 view(scene->getCamera().getView());
-        glm::dvec3 offset(0.01, 0.000, 0.000);
+        glm::dvec3 eye(scene->getCamera().getEye());
+        glm::dvec3 offset(eye[0] / 8.0, 0.00, 0.00);
         glm::mat3 red, blue;
         col1 = trace(x, y);
-        scene->getCamera().setLook(view - offset, up);
+        scene->getCamera().setEye(eye + offset);
         col2 = trace(x, y);
-        scene->getCamera().setLook(view + offset, up);
+        scene->getCamera().setEye(eye);
 
         switch (traceUI->get3dMode()) {
             case 0:
