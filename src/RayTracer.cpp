@@ -19,6 +19,7 @@
 
 #include <fstream>
 #include <iostream>
+#include <random>
 
 using namespace std;
 extern TraceUI* traceUI;
@@ -55,14 +56,47 @@ glm::dvec3 RayTracer::trace(double x, double y) {
 
 glm::dvec3 RayTracer::tracePixel(int i, int j) {
     glm::dvec3 col(0, 0, 0);
+    glm::dvec3 col1(0, 0, 0);
+    glm::dvec3 col2(0, 0, 0);
 
     if (!sceneLoaded()) return col;
 
     double x = double(i) / double(buffer_width);
     double y = double(j) / double(buffer_height);
 
+    // std::cout << view - offset << std::endl;
+    // std::cout << view + offset << std::endl;
+    // std::cout << up << std::endl;
     unsigned char* pixel = buffer.data() + (i + j * buffer_width) * 3;
-    col = trace(x, y);
+
+    if (traceUI->dddSwitch()) {
+        glm::dvec3 up(scene->getCamera().getUp());
+        glm::dvec3 view(scene->getCamera().getView());
+        glm::dvec3 offset(0.01, 0.000, 0.000);
+        glm::mat3 red, blue;
+        col1 = trace(x, y);
+        scene->getCamera().setLook(view - offset, up);
+        col2 = trace(x, y);
+        scene->getCamera().setLook(view + offset, up);
+
+        switch (traceUI->get3dMode()) {
+            case 0:
+                red = glm::mat3(glm::dvec3(.299, 0.0, 0.0),
+                                glm::dvec3(.587, 0.0, 0.0),
+                                glm::dvec3(.114, 0.0, 0.0));
+                blue = glm::mat3(glm::dvec3(0.0, .299, .299),
+                                 glm::dvec3(0.0, .587, .587),
+                                 glm::dvec3(0.0, .114, .114));
+                break;
+            default:
+                break;
+        }
+
+        col = red * col1 + blue * col2;
+    } else {
+        col = trace(x, y);
+    }
+    // col = red * col1;
 
     pixel[0] = (int)(255.0 * col[0]);
     pixel[1] = (int)(255.0 * col[1]);
@@ -291,13 +325,8 @@ void RayTracer::traceImage(int w, int h) {
 }
 
 int RayTracer::aaImage() {
-    // YOUR CODE HERE
-    // FIXME: Implement Anti-aliasing here
-    //
-    // TIP: samples and aaThresh have been synchronized with TraceUI by
-    //      RayTracer::traceSetup() function
-    // traceSetup(w, h);
-
+    std::random_device rd;   // obtain a random number from hardware
+    std::mt19937 eng(rd());  // seed the generator
     for (int i = 0; i < buffer_width; i++) {
         for (int j = 0; j < buffer_height; j++) {
             glm::dvec3 color(0.0, 0.0, 0.0);
@@ -307,6 +336,31 @@ int RayTracer::aaImage() {
                                double(buffer_width * samples);
                     double y = double(j * samples + n) /
                                double(buffer_height * samples);
+                    if (traceUI->ssSwitch()) {
+                        // https://www.alanzucconi.com/2015/09/16/how-to-sample-from-a-gaussian-distribution/
+                        double dist_min = min(buffer_height * samples,
+                                              buffer_width * samples);
+                        std::uniform_real_distribution<double> dist(-1.0, 1.0);
+
+                        double u1, u2, s;
+                        do {
+                            u1 = dist(eng);
+                            u2 = dist(eng);
+                            s = u1 * u1 + u2 * u2;
+                        } while (s >= 1.0 || s == 0.0);
+
+                        s = sqrt((-2.0 * glm::log(s)) / s);
+
+                        u1 *= s;
+
+                        u1 *= dist_min;
+                        u1 /= samples;
+                        u2 *= dist_min;
+                        u2 /= samples;
+                        x += u1;
+                        y += u2;
+                    }
+
                     color += trace(x, y);
                 }
             }

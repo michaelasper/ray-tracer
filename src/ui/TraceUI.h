@@ -42,7 +42,10 @@ class TraceUI {
     int getLeafSize() const { return m_nLeafSize; }
     int getFilterWidth() const { return m_nFilterWidth; }
     int getThreads() const { return m_threads; }
+    int get3dMode() const { return m_3d_mode; }
     bool aaSwitch() const { return m_antiAlias; }
+    bool ssSwitch() const { return m_stochaticAlias; }
+    bool dddSwitch() const { return m_render3d; }
     bool kdSwitch() const { return m_kdTree; }
     bool shadowSw() const { return m_shadows; }
     bool smShadSw() const { return m_smoothshade; }
@@ -100,6 +103,7 @@ class TraceUI {
     int m_nTreeDepth = 15;   // maximum kdTree depth
     int m_nLeafSize = 10;    // target number of objects per leaf
     int m_nFilterWidth = 1;  // width of cubemap filter
+    int m_3d_mode = 0;
 
     static int rayCount[MAX_THREADS];  // Ray counter
 
@@ -107,7 +111,8 @@ class TraceUI {
     // for individual rays.  Disabled by default for efficiency
     // reasons.
     bool m_displayDebuggingInfo = false;
-    bool m_antiAlias = false;     // Is antialiasing on?
+    bool m_antiAlias = false;  // Is antialiasing on?
+    bool m_stochaticAlias = false;
     bool m_kdTree = true;         // use kd-tree?
     bool m_shadows = true;        // compute shadows?
     bool m_smoothshade = true;    // turn on/off smoothshading?
@@ -118,6 +123,7 @@ class TraceUI {
     bool m_backfaceSpecular =
         false;  // Enable specular component even seeing through the back of a
                 // translucent object.
+    bool m_render3d = false;
 
     std::unique_ptr<CubeMap> cubemap;
 

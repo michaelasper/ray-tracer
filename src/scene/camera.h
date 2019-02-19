@@ -10,6 +10,7 @@ class Camera {
     Camera();
     void rayThrough(double x, double y, ray& r);
     void setEye(const glm::dvec3& eye);
+    void setm(const glm::dmat3& m) { this->m = m; }
     void setLook(double, double, double, double);
     void setLook(const glm::dvec3& viewDir, const glm::dvec3& upDir);
     void setFOV(double);
@@ -21,14 +22,18 @@ class Camera {
     const glm::dvec3& getLook() const { return look; }
     const glm::dvec3& getU() const { return u; }
     const glm::dvec3& getV() const { return v; }
+    const glm::dmat3& getM() const { return m; }
+    const glm::dvec3& getUp() const { return up; }
+    const glm::dvec3& getView() const { return view; }
+    void update();  // using the above three values calculate look,u,v
 
    private:
     glm::dmat3 m;             // rotation matrix
     double normalizedHeight;  // dimensions of image place at unit dist from eye
     double aspectRatio;
+    bool isLookSet;
 
-    void update();  // using the above three values calculate look,u,v
-
+    glm::dvec3 up, view;
     glm::dvec3 eye;
     glm::dvec3 look;  // direction to look
     glm::dvec3 u, v;  // u and v in the
