@@ -73,16 +73,25 @@ glm::dvec3 RayTracer::tracePixel(int i, int j) {
         glm::dvec3 up(scene->getCamera().getUp());
         glm::dvec3 view(scene->getCamera().getView());
         glm::dvec3 offset(0.01, 0.000, 0.000);
-
+        glm::mat3 red, blue;
         col1 = trace(x, y);
         scene->getCamera().setLook(view - offset, up);
         col2 = trace(x, y);
         scene->getCamera().setLook(view + offset, up);
 
-        glm::mat3 red(glm::dvec3(.299, 0, 0), glm::dvec3(.587, 0, 0),
-                      glm::dvec3(.114, 0, 0));
-        glm::mat3 blue(glm::dvec3(0, .299, .299), glm::dvec3(0, .587, .587),
-                       glm::dvec3(0, .114, .114));
+        switch (traceUI->get3dMode()) {
+            case 0:
+                red = glm::mat3(glm::dvec3(.299, 0.0, 0.0),
+                                glm::dvec3(.587, 0.0, 0.0),
+                                glm::dvec3(.114, 0.0, 0.0));
+                blue = glm::mat3(glm::dvec3(0.0, .299, .299),
+                                 glm::dvec3(0.0, .587, .587),
+                                 glm::dvec3(0.0, .114, .114));
+                break;
+            default:
+                break;
+        }
+
         col = red * col1 + blue * col2;
     } else {
         col = trace(x, y);
