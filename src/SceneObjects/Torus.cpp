@@ -70,6 +70,7 @@ bool Torus::intersectLocal(ray& r, isect& i) const
     // Compute U and V
     double u = 0.5 + glm::atan(P[2], P[0]) / (2*glm::pi<double>());
     double v = 0.5 + glm::atan(P[1], sqrt(P[0]*P[0] + P[2]*P[2]) - a) / (2*glm::pi<double>());
+    i.setUVCoordinates(glm::dvec2(u, v));
 
 	i.setObject(this);
 	i.setMaterial(this->getMaterial());
