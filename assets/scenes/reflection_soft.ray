@@ -16,11 +16,12 @@ camera {
 }
 */
 
-
+/*
 directional_light {
 	direction = (0, 0, 1);
 	colour = (1.0, 1.0, 1.0);
 }
+*/
 
 
 area_light {
@@ -32,10 +33,11 @@ area_light {
 	quadratic_attenuation_coeff = 0.000045492;	
 }
 
-point_light {
+area_light {
+	bottom_radius = 0.5;
 	position = (3,0,-4);
-	colour = (0.0,1.0,0.0)
-	cognstant_attenuation_coeff= 0.25;
+	colour = (1.0,1.0,0.7)
+	constant_attenuation_coeff= 0.25;
 	linear_attenuation_coeff = 0.003372407;
 	quadratic_attenuation_coeff = 0.000045492;	
 }

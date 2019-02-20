@@ -3,9 +3,9 @@
 
 #include <glm/glm.hpp>
 #include <glm/gtx/io.hpp>
+#include <random>
 #include "../ui/TraceUI.h"
 #include "light.h"
-#include <random>
 
 using namespace std;
 extern TraceUI* traceUI;
@@ -113,87 +113,88 @@ glm::dvec3 AreaLight::getDirection(const glm::dvec3& P) const {
     return glm::normalize(position - P);
 }
 
-glm::dvec3 AreaLight::shadowAttenuation(const ray& r,
-                                         const glm::dvec3& p) const {
+glm::dvec3 AreaLight::shadowAttenTail(const ray& r, const glm::dvec3& p) const {
     isect i;
     ray shadow(r);
     // calculate length
     double diff = glm::length(p - position);
 
-    glm::dvec3 ret = glm::dvec3(0.0);
+    // have to check if t < t_light
+    if (this->scene->intersect(shadow, i) && i.getT() < diff) {
+        if (i.getMaterial().Trans()) {
+            // classic bug avoidance
+            shadow.setPosition(shadow.at(i.getT() + 0.0001));
+            // check if inside
+            if (glm::dot(shadow.getDirection(), i.getN()) > 0) {
+                double d = i.getT();
+                auto trans = i.getMaterial().kt(i);
+                glm::dvec3 atten(std::pow(trans[0], d), std::pow(trans[1], d),
+                                 std::pow(trans[2], d));
+                shadow.setPosition(shadow.at(i) + i.getN() * RAY_EPSILON);
+                atten *= this->shadowAttenTail(shadow, shadow.getPosition());
+                if (traceUI->isThreshold() &&
+                    glm::dot(atten, atten) < traceUI->getThreshold())
+                    return glm::dvec3(0.0);
+                return atten;
+            } else {
+                shadow.setPosition(shadow.at(i) + i.getN() * -RAY_EPSILON);
+                return this->shadowAttenTail(shadow, shadow.getPosition());
+            }
+        } else {
+            return glm::dvec3(0.0, 0.0, 0.0);
+        }
+    } else {
+        return glm::dvec3(1.0, 1.0, 1.0);
+    }
+}
+
+glm::dvec3 AreaLight::shadowAttenuation(const ray& r,
+                                        const glm::dvec3& p) const {
+    isect i;
+    ray shadow(r);
+    // calculate length
+    double diff = glm::length(p - position);
+
+    glm::dvec3 ret = glm::dvec3(1.0);
 
     // Compute local coordinate system
     glm::dvec3 P = shadow.at(diff);
     double min_abs = -1;
     glm::dvec3 U, V;
-    if(abs(P[0]) < abs(P[1]) && abs(P[0]) < abs(P[2])) {
+    if (abs(P[0]) < abs(P[1]) && abs(P[0]) < abs(P[2])) {
         U = glm::dvec3(0, -P[2], P[1]);
         V = glm::cross(U, P);
-    }
-    else if(abs(P[1]) < abs(P[0]) && abs(P[1]) < abs(P[2])) {
+    } else if (abs(P[1]) < abs(P[0]) && abs(P[1]) < abs(P[2])) {
         U = glm::dvec3(-P[2], 0, P[0]);
         V = glm::cross(U, P);
-    }
-    else {
-        U = glm::dvec3(-P[1], P[0], 0);        
+    } else {
+        U = glm::dvec3(-P[1], P[0], 0);
         V = glm::cross(U, P);
     }
 
-    U = glm::normalize(U);    
-    V = glm::normalize(V);    
-    P = glm::normalize(P);    
-
+    U = glm::normalize(U);
+    V = glm::normalize(V);
+    P = glm::normalize(P);
 
     std::random_device rd1;
     std::mt19937 eng1(rd1());
     std::uniform_real_distribution<double> distRadius(0, radius);
     std::uniform_real_distribution<double> distPhi(0, 2 * glm::pi<double>());
-    
-    int val = 50;
-    for(int k = 0; k<val; k++) {
-    
+    shadow.setPosition(p - r.getDirection() * 1e-7);
+
+    int val = 150;
+    for (int k = 0; k < val; k++) {
         auto phi = distPhi(eng1);
         auto rad = distRadius(eng1);
 
-        glm::dvec3 offVec = position + (glm::cos(phi) * V + glm::sin(phi) * U) * rad;
+        glm::dvec3 offVec =
+            position + (glm::cos(phi) * V + glm::sin(phi) * U) * rad;
         shadow.setDirection(glm::normalize(offVec));
 
-        // have to check if t < t_light
-        if (this->scene->intersect(shadow, i) && i.getT() < diff) {
-            if (i.getMaterial().Trans()) {
-                /* Not sure what do in this case */
-
-                /* 
-                // classic bug avoidance
-                shadow.setPosition(shadow.at(i.getT() + 0.0001));
-                // check if inside
-                if (glm::dot(shadow.getDirection(), i.getN()) > 0) {
-                    double d = i.getT();
-                    auto trans = i.getMaterial().kt(i);
-                    glm::dvec3 atten(std::pow(trans[0], d), std::pow(trans[1], d),
-                                    std::pow(trans[2], d));
-                    shadow.setPosition(shadow.at(i) + i.getN() * RAY_EPSILON);
-                    atten *= this->shadowAttenuation(shadow, shadow.getPosition());
-                    if (traceUI->isThreshold() &&
-                        glm::dot(atten, atten) < traceUI->getThreshold())
-                        ret += glm::dvec3(0.0);
-                    return atten;
-                } else {
-                    shadow.setPosition(shadow.at(i) + i.getN() * -RAY_EPSILON);
-                    ret += this->shadowAttenuation(shadow, shadow.getPosition());
-                }
-                */
-                
-            } else {
-                ret += glm::dvec3(0.0, 0.0, 0.0);
-            }
-        } else {
-            ret += glm::dvec3(1.0, 1.0, 1.0);
-        }
+        ret += this->shadowAttenTail(shadow, -offVec);
     }
     ret /= val;
     return ret;
 }
-
 
 #define VERBOSE 0
