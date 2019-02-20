@@ -44,4 +44,4 @@ Use `-d [3dmode]`
 
 ### Toon shading
 
-Use `-w`
+Use `-n`

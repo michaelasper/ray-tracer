@@ -25,7 +25,7 @@ CommandLineUI::CommandLineUI(int argc, char** argv) : TraceUI() {
     progName = argv[0];
     const char* jsonfile = nullptr;
     string cubemap_file;
-    while ((i = getopt(argc, argv, "tr:w:hj:c:z:d:a:f:q:")) != EOF) {
+    while ((i = getopt(argc, argv, "tr:w:hj:c:z:d:a:f:q:n")) != EOF) {
         switch (i) {
             case 'r':
                 m_nDepth = atoi(optarg);
@@ -59,6 +59,9 @@ CommandLineUI::CommandLineUI(int argc, char** argv) : TraceUI() {
             case 'd':
                 m_3d_mode = atoi(optarg);
                 m_render3d = true;
+                break;
+            case 'n':
+                m_toon = true;
                 break;
             case 'h':
                 usage();

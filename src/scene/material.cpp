@@ -21,8 +21,7 @@ glm::dvec3 Material::shade(Scene* scene, const ray& r, const isect& i) const {
     glm::dvec3 intensity = ke(i) + ka(i) * Ia;
     glm::dvec3 pos = r.at(i);
     double alpha = shininess(i);
-    bool toon = true;
-    if (!toon) {
+    if (!traceUI->toonSwitch()) {
         // iterate through all the lights
         for (const auto& pLight : scene->getAllLights()) {
             glm::dvec3 l = pLight->getDirection(pos);
@@ -45,6 +44,7 @@ glm::dvec3 Material::shade(Scene* scene, const ray& r, const isect& i) const {
     } else {
         int levels = 5;
         double scale = 1.0 / levels;
+        
 
         for (const auto& pLight : scene->getAllLights()) {
             glm::dvec3 l = pLight->getDirection(pos);
@@ -76,11 +76,12 @@ glm::dvec3 Material::shade(Scene* scene, const ray& r, const isect& i) const {
             // Edge Detection
             intensity += atten * (diffuse + spec);
         }
+
+        double edge = glm::dot(v, normal) > 0.2 ? 1.0 : 0.0;
+        edge* intensity;
     }
 
-    double edge = glm::dot(v, normal) > 0.2 ? 1.0 : 0.0;
-
-    return edge * intensity;
+    return intensity;
 }
 
 TextureMap::TextureMap(string filename) {
