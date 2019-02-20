@@ -58,7 +58,7 @@ bool Torus::intersectLocal(ray& r, isect& i) const
     if(min_root == 1000000.0) {
         return false;
     }
-    
+
     i.setT(min_root);
 
     // Compute the normal
@@ -66,6 +66,11 @@ bool Torus::intersectLocal(ray& r, isect& i) const
     double alpha = a / sqrt(P[0]*P[0] + P[1]*P[1]);
     glm::vec3 N = glm::dvec3((1-alpha)*P[0], (1-alpha)*P[1], P[2]);
     i.setN(glm::normalize(N));
+
+    // Compute U and V
+    double u = 0.5 + glm::atan(P[2], P[0]) / (2*glm::pi<double>());
+    double v = 0.5 + glm::atan(P[1], sqrt(P[0]*P[0] + P[2]*P[2]) - a) / (2*glm::pi<double>());
+
 	i.setObject(this);
 	i.setMaterial(this->getMaterial());
 
