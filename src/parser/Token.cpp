@@ -41,6 +41,7 @@ string getNameForToken(const SYMBOL kind) {
         tokenNames[SEMICOLON] = "Semicolon";
         tokenNames[CAMERA] = "camera";
         tokenNames[AMBIENT_LIGHT] = "ambient_light";
+        tokenNames [AREA_LIGHT] = "area_light";
         tokenNames[POINT_LIGHT] = "point_light";
         tokenNames[DIRECTIONAL_LIGHT] = "directional_light";
         tokenNames[CONSTANT_ATTENUATION_COEFF] = "constant_attenuation_coeff";
@@ -110,6 +111,7 @@ SYMBOL lookupReservedWord(const string& ident) {
     if (reservedWords.empty()) {
         reservedWords["ambient_light"] = AMBIENT_LIGHT;
         reservedWords["ambient"] = AMBIENT;
+        reservedWords["area_light"] = AREA_LIGHT;
         reservedWords["aspectratio"] = ASPECTRATIO;
         reservedWords["bottom_radius"] = BOTTOM_RADIUS;
         reservedWords["box"] = BOX;

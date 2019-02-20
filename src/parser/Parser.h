@@ -59,6 +59,7 @@ class Parser {
                        const Material& mat);
 
     // Parse lights
+    AreaLight* parseAreaLight(Scene* scene);
     PointLight* parsePointLight(Scene* scene);
     DirectionalLight* parseDirectionalLight(Scene* scene);
     void parseAmbientLight(Scene* scene);
