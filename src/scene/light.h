@@ -93,17 +93,18 @@ class PointLight : public Light {
 // Disk
 class AreaLight : public Light {
    public:
-    AreaLight(Scene* scene, const glm::dvec3& pos, float r, const glm::dvec3& color,
-               float constantAttenuationTerm, float linearAttenuationTerm,
-               float quadraticAttenuationTerm)
+    AreaLight(Scene* scene, const glm::dvec3& pos, float r,
+              const glm::dvec3& color, float constantAttenuationTerm,
+              float linearAttenuationTerm, float quadraticAttenuationTerm)
         : Light(scene, color),
           position(pos),
           radius(r),
           constantTerm(constantAttenuationTerm),
           linearTerm(linearAttenuationTerm),
-          quadraticTerm(quadraticAttenuationTerm) {
-    }
+          quadraticTerm(quadraticAttenuationTerm) {}
 
+    virtual glm::dvec3 shadowAttenTail(const ray& r,
+                                       const glm::dvec3& pos) const;
     virtual glm::dvec3 shadowAttenuation(const ray& r,
                                          const glm::dvec3& pos) const;
     virtual double distanceAttenuation(const glm::dvec3& P) const;
