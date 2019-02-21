@@ -96,44 +96,24 @@ glm::dvec3 PointLight::shadowAttenuation(const ray& r,
 
     // have to check if t < t_light
     if (this->scene->intersect(shadow, i) && i.getT() < diff) {
-        // check if material is translucent for refraction
-        auto newPos = shadow.getPosition() + i.getT() * shadow.getDirection();
         if (i.getMaterial().Trans()) {
+            // classic bug avoidance
+            shadow.setPosition(shadow.at(i.getT() + 0.0001));
             // check if inside
             if (glm::dot(shadow.getDirection(), i.getN()) > 0) {
                 double d = i.getT();
                 auto trans = i.getMaterial().kt(i);
                 glm::dvec3 atten(std::pow(trans[0], d), std::pow(trans[1], d),
                                  std::pow(trans[2], d));
-
-                shadow.setPosition(newPos +
-                                   2 * RAY_EPSILON * shadow.getDirection());
+                shadow.setPosition(shadow.at(i) + i.getN() * RAY_EPSILON);
                 atten *= this->shadowAttenuation(shadow, shadow.getPosition());
                 if (traceUI->isThreshold() &&
                     glm::dot(atten, atten) < traceUI->getThreshold())
                     return glm::dvec3(0.0);
-
                 return atten;
             } else {
-                shadow.setPosition(newPos +
-                                   RAY_EPSILON * shadow.getDirection());
-                isect i2;
-                if (scene->intersect(shadow, i2)) {
-                    double d = i2.getT();
-                    glm::dvec3 newPos2 =
-                        shadow.getPosition() + d * shadow.getDirection();
-                    glm::dvec3 posOff = 2 * RAY_EPSILON * shadow.getDirection();
-                    auto trans = i.getMaterial().kt(i);
-
-                    glm::dvec3 atten(std::pow(trans[0], d),
-                                     std::pow(trans[1], d),
-                                     std::pow(trans[2], d));
-                    ray sRay2(posOff, shadow.getDirection(), glm::dvec3(1.0),
-                              ray::SHADOW);
-                    return atten * this->shadowAttenuation(sRay2, posOff);
-                } else {
-                    return glm::dvec3(1.0, 1.0, 1.0);
-                }
+                shadow.setPosition(shadow.at(i) + i.getN() * -RAY_EPSILON);
+                return this->shadowAttenuation(shadow, shadow.getPosition());
             }
         } else {
             return glm::dvec3(0.0, 0.0, 0.0);
@@ -162,44 +142,24 @@ glm::dvec3 AreaLight::shadowAttenTail(const ray& r, const glm::dvec3& p) const {
 
     // have to check if t < t_light
     if (this->scene->intersect(shadow, i) && i.getT() < diff) {
-        // check if material is translucent for refraction
-        auto newPos = shadow.getPosition() + i.getT() * shadow.getDirection();
         if (i.getMaterial().Trans()) {
+            // classic bug avoidance
+            shadow.setPosition(shadow.at(i.getT() + 0.0001));
             // check if inside
             if (glm::dot(shadow.getDirection(), i.getN()) > 0) {
                 double d = i.getT();
                 auto trans = i.getMaterial().kt(i);
                 glm::dvec3 atten(std::pow(trans[0], d), std::pow(trans[1], d),
                                  std::pow(trans[2], d));
-
-                shadow.setPosition(newPos +
-                                   2 * RAY_EPSILON * shadow.getDirection());
-                atten *= this->shadowAttenuation(shadow, shadow.getPosition());
+                shadow.setPosition(shadow.at(i) + i.getN() * RAY_EPSILON);
+                atten *= this->shadowAttenTail(shadow, shadow.getPosition());
                 if (traceUI->isThreshold() &&
                     glm::dot(atten, atten) < traceUI->getThreshold())
                     return glm::dvec3(0.0);
-
                 return atten;
             } else {
-                shadow.setPosition(newPos +
-                                   RAY_EPSILON * shadow.getDirection());
-                isect i2;
-                if (scene->intersect(shadow, i2)) {
-                    double d = i2.getT();
-                    glm::dvec3 newPos2 =
-                        shadow.getPosition() + d * shadow.getDirection();
-                    glm::dvec3 posOff = 2 * RAY_EPSILON * shadow.getDirection();
-                    auto trans = i.getMaterial().kt(i);
-
-                    glm::dvec3 atten(std::pow(trans[0], d),
-                                     std::pow(trans[1], d),
-                                     std::pow(trans[2], d));
-                    ray sRay2(posOff, shadow.getDirection(), glm::dvec3(1.0),
-                              ray::SHADOW);
-                    return atten * this->shadowAttenuation(sRay2, posOff);
-                } else {
-                    return glm::dvec3(1.0, 1.0, 1.0);
-                }
+                shadow.setPosition(shadow.at(i) + i.getN() * -RAY_EPSILON);
+                return this->shadowAttenTail(shadow, shadow.getPosition());
             }
         } else {
             return glm::dvec3(0.0, 0.0, 0.0);
