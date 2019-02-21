@@ -18,7 +18,7 @@ bool BVH::getIntersection(ray& r, isect& i) const {
         int index = currentNode.i;
         double t = currentNode.min_t;
 
-        const BVHNode& node = flatTree[index];
+        const BVHNode& node(flatTree[index]);
         if (t > threshold) continue;
 
         if (node.offset == 0) {
@@ -116,8 +116,8 @@ void BVH::construct() {
         BoundingBox bb = objects[start]->getBoundingBox();
         BoundingBox bc(bb.getCenter());
 
-        for (int p = start + 1; p < end; p++) {
-            BoundingBox tempbb = objects[p]->getBoundingBox();
+        for (int i = start + 1; i < end; i++) {
+            BoundingBox tempbb = objects[i]->getBoundingBox();
             BoundingBox tempbc(tempbb.getCenter());
             bb.merge(tempbb);
             bc.merge(tempbc);
@@ -132,7 +132,8 @@ void BVH::construct() {
             leafs++;
         }
 
-        nodes[size++] = node;
+        nodes[size] = node;
+        size++;
 
         if (currentNode.parent != -1) {
             nodes[currentNode.parent].offset--;
@@ -150,7 +151,7 @@ void BVH::construct() {
 
         int mid = start;
         for (int i = start; i < end; i++) {
-            BoundingBox temp = objects[i]->getBoundingBox();
+        BoundingBox temp = objects[i]->getBoundingBox();
             if (temp.getCenter()[splitDimension] < split) {
                 std::swap(objects[i], objects[mid]);
                 mid++;

@@ -7,7 +7,7 @@
 #include "ray.h"
 #include "scene.h"
 
-#define EPSILON 9999999.0
+#define EPSILON 99999999.0
 
 class Geometry;
 class Scene;
