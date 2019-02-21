@@ -25,7 +25,7 @@ CommandLineUI::CommandLineUI(int argc, char** argv) : TraceUI() {
     progName = argv[0];
     const char* jsonfile = nullptr;
     string cubemap_file;
-    while ((i = getopt(argc, argv, "tr:w:hj:c:z:d:a:f:q:n")) != EOF) {
+    while ((i = getopt(argc, argv, "tr:w:hj:c:z:d:a:f:q:ne:")) != EOF) {
         switch (i) {
             case 'r':
                 m_nDepth = atoi(optarg);
@@ -47,14 +47,13 @@ CommandLineUI::CommandLineUI(int argc, char** argv) : TraceUI() {
                 m_nSuperSamples = atoi(optarg);
                 break;
             case 'f':
-                // std::cout << "set" << std::endl;
                 m_antiAlias = true;
                 m_stochaticAlias = true;
                 m_nSuperSamples = atoi(optarg);
                 break;
             case 'q':
                 m_depthOfField = true;
-                m_focalDistance = atoi(optarg);
+                m_focalDistance = atof(optarg);
                 break;
             case 'e':
                 m_ApSize = atof(optarg);
@@ -111,6 +110,7 @@ int CommandLineUI::run() {
             raytracer->aaImage();
             raytracer->waitRender();
         }
+
 
         end = clock();
 
