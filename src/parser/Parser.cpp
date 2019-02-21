@@ -545,7 +545,7 @@ void Parser::parseQuadric(Scene* scene, TransformNode* transform,
     _tokenizer.Read(QUADRIC);
     _tokenizer.Read(LBRACE);
 
-    Quadric* quadric;
+    Quadric* quadric = new Quadric(scene, new Material(mat));
     Material* newMat = 0;
 
     // double bottomRadius = 1.0;
@@ -560,32 +560,32 @@ void Parser::parseQuadric(Scene* scene, TransformNode* transform,
             case MATERIAL:
                 delete newMat;
                 newMat = parseMaterialExpression(scene, mat);
+                quadric->setMaterial(newMat);
                 break;
             case NAME:
                 parseIdentExpression();
                 break;
-                /*
+
             case POLYPOINTS:
                 _tokenizer.Read(POLYPOINTS);
                 _tokenizer.Read(EQUALS);
                 _tokenizer.Read(LPAREN);
                 if (RPAREN != _tokenizer.Peek()->kind()) {
-                    //tmesh->addVertex(parseVec3d());
+                    quadric->addVertex(parseVec3d());
                     for (;;) {
                         const Token* nextToken = _tokenizer.Peek();
                         if (RPAREN == nextToken->kind()) break;
                         _tokenizer.Read(COMMA);
-                        tmesh->addVertex(parseVec3d());
+                        quadric->addVertex(parseVec3d());
                     }
                 }
+                quadric->update();
                 _tokenizer.Read(RPAREN);
                 _tokenizer.Read(SEMICOLON);
                 break;
-                */
+
             case RBRACE:
                 _tokenizer.Read(RBRACE);
-                quadric =
-                    new Quadric(scene, newMat ? newMat : new Material(mat));
                 quadric->setTransform(transform);
                 scene->add(quadric);
                 return;
