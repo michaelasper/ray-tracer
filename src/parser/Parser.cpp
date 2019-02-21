@@ -164,6 +164,7 @@ void Parser::parseTransformableElement(Scene* scene, TransformNode* transform,
         case TRIMESH:
         case TRANSLATE:
         case ROTATE:
+        case TORUS:
         case SCALE:
         case TRANSFORM:
             parseGeometry(scene, transform, mat);
@@ -563,12 +564,13 @@ void Parser::parseQuadric(Scene* scene, TransformNode* transform,
             case NAME:
                 parseIdentExpression();
                 break;
+                /*
             case POLYPOINTS:
                 _tokenizer.Read(POLYPOINTS);
                 _tokenizer.Read(EQUALS);
                 _tokenizer.Read(LPAREN);
                 if (RPAREN != _tokenizer.Peek()->kind()) {
-                    tmesh->addVertex(parseVec3d());
+                    //tmesh->addVertex(parseVec3d());
                     for (;;) {
                         const Token* nextToken = _tokenizer.Peek();
                         if (RPAREN == nextToken->kind()) break;
@@ -579,6 +581,7 @@ void Parser::parseQuadric(Scene* scene, TransformNode* transform,
                 _tokenizer.Read(RPAREN);
                 _tokenizer.Read(SEMICOLON);
                 break;
+                */
             case RBRACE:
                 _tokenizer.Read(RBRACE);
                 quadric =
