@@ -264,7 +264,11 @@ glm::dvec3 RayTracer::traceRay(ray& r, double thresh, int depth, double& t) {
         }
 
     } else {
-        colorC = glm::dvec3(0.0, 0.0, 0.0);
+        if(traceUI->cubeMap()) {
+            colorC = cubemap->getColor(r);
+        }
+        else
+            colorC = glm::dvec3(0.0, 0.0, 0.0);
     }
     return colorC;
 }
@@ -352,6 +356,8 @@ void RayTracer::traceSetup(int w, int h) {
     thresh = traceUI->getThreshold();
     samples = traceUI->getSuperSamples();
     aaThresh = traceUI->getAaThreshold();
+    if(traceUI->cubeMap())
+        cubemap = traceUI->getCubeMap();
 
     // YOUR CODE HERE
     // FIXME: Additional initializations
