@@ -47,6 +47,8 @@ Scene* Parser::parseScene() {
             case SQUARE:
             case CYLINDER:
             case CONE:
+            case QUADRIC:
+            case TORUS:
             case TRIMESH:
             case TRANSLATE:
             case ROTATE:
@@ -158,6 +160,7 @@ void Parser::parseTransformableElement(Scene* scene, TransformNode* transform,
         case SQUARE:
         case CYLINDER:
         case CONE:
+        case QUADRIC:
         case TRIMESH:
         case TRANSLATE:
         case ROTATE:
@@ -187,6 +190,7 @@ void Parser::parseGroup(Scene* scene, TransformNode* transform,
             case SQUARE:
             case CYLINDER:
             case CONE:
+            case QUADRIC:
             case TRIMESH:
             case TRANSLATE:
             case ROTATE:
@@ -228,6 +232,12 @@ void Parser::parseGeometry(Scene* scene, TransformNode* transform,
             return;
         case CONE:
             parseCone(scene, transform, mat);
+            return;
+        case QUADRIC:
+            parseQuadric(scene, transform, mat);
+            return;
+        case TORUS:
+            parseTorus(scene, transform, mat);
             return;
         case TRIMESH:
             parseTrimesh(scene, transform, mat);
@@ -529,6 +539,88 @@ void Parser::parseCone(Scene* scene, TransformNode* transform,
     }
 }
 
+void Parser::parseQuadric(Scene* scene, TransformNode* transform,
+                          const Material& mat) {
+    _tokenizer.Read(QUADRIC);
+    _tokenizer.Read(LBRACE);
+
+    Quadric* quadric;
+    Material* newMat = 0;
+
+    // double bottomRadius = 1.0;
+    // double topRadius = 0.0;
+    // double height = 1.0;
+    // bool capped = true;				// Capped by default
+
+    for (;;) {
+        const Token* t = _tokenizer.Peek();
+
+        switch (t->kind()) {
+            case MATERIAL:
+                delete newMat;
+                newMat = parseMaterialExpression(scene, mat);
+                break;
+            case NAME:
+                parseIdentExpression();
+                break;
+            // case CAPPED:
+            //  capped = parseBooleanExpression();
+            //  break;
+            // case BOTTOM_RADIUS:
+            //  bottomRadius = parseScalarExpression();
+            //  break;
+            // case TOP_RADIUS:
+            //  topRadius = parseScalarExpression();
+            //  break;
+            // case HEIGHT:
+            //  height = parseScalarExpression();
+            //  break;
+            case RBRACE:
+                _tokenizer.Read(RBRACE);
+                quadric =
+                    new Quadric(scene, newMat ? newMat : new Material(mat));
+                quadric->setTransform(transform);
+                scene->add(quadric);
+                return;
+            default:
+                throw SyntaxErrorException("Expected: quadric attributes",
+                                           _tokenizer);
+        }
+    }
+}
+
+void Parser::parseTorus(Scene* scene, TransformNode* transform,
+                        const Material& mat) {
+    Torus* torus = 0;
+    Material* newMat = 0;
+
+    _tokenizer.Read(TORUS);
+    _tokenizer.Read(LBRACE);
+
+    for (;;) {
+        const Token* t = _tokenizer.Peek();
+
+        switch (t->kind()) {
+            case MATERIAL:
+                delete newMat;
+                newMat = parseMaterialExpression(scene, mat);
+                break;
+            case NAME:
+                parseIdentExpression();
+                break;
+            case RBRACE:
+                _tokenizer.Read(RBRACE);
+                torus = new Torus(scene, newMat ? newMat : new Material(mat));
+                torus->setTransform(transform);
+                scene->add(torus);
+                return;
+            default:
+                throw SyntaxErrorException("Expected: torus attributes",
+                                           _tokenizer);
+        }
+    }
+}
+
 void Parser::parseTrimesh(Scene* scene, TransformNode* transform,
                           const Material& mat) {
     Trimesh* tmesh = new Trimesh(scene, new Material(mat), transform);
@@ -787,7 +879,7 @@ AreaLight* Parser::parseAreaLight(Scene* scene) {
                 hasPosition = true;
                 break;
             case BOTTOM_RADIUS:
-                if(hasRadius)
+                if (hasRadius)
                     throw SyntaxErrorException("Repeated 'radius' attribute",
                                                _tokenizer);
                 radius = parseScalarExpression();
@@ -819,15 +911,15 @@ AreaLight* Parser::parseAreaLight(Scene* scene) {
                 if (!hasPosition)
                     throw SyntaxErrorException("Expected: 'position'",
                                                _tokenizer);
-                if(!hasRadius)
+                if (!hasRadius)
                     throw SyntaxErrorException("Expected: 'radius'",
                                                _tokenizer);
-                    
+
                 _tokenizer.Read(RBRACE);
                 return new AreaLight(scene, position, radius, color,
-                                      constantAttenuationCoefficient,
-                                      linearAttenuationCoefficient,
-                                      quadraticAttenuationCoefficient);
+                                     constantAttenuationCoefficient,
+                                     linearAttenuationCoefficient,
+                                     quadraticAttenuationCoefficient);
 
             default:
                 throw SyntaxErrorException(
@@ -838,7 +930,6 @@ AreaLight* Parser::parseAreaLight(Scene* scene) {
         }
     }
 }
-
 
 DirectionalLight* Parser::parseDirectionalLight(Scene* scene) {
     glm::dvec3 direction;

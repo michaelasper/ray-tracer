@@ -13,6 +13,7 @@ Daniel Mancia - dam4754
 * (5 pts) Stocahstic supersampling
 * (10 pts) New geometry: dedicated torii and general quadrics
 * (20 pts) Depth of field
+    * (+10) Soft Shadows
 * (20 pts) 3D images for viewing with glasses (Anaglyph)
 * (varied pts) Implement different modes of shading: cel shading
 

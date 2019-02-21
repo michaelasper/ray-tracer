@@ -9,10 +9,13 @@
 #include "../scene/scene.h"
 
 #include "../SceneObjects/Box.h"
+#include "../SceneObjects/Circle.h"
 #include "../SceneObjects/Cone.h"
 #include "../SceneObjects/Cylinder.h"
+#include "../SceneObjects/Quadric.h"
 #include "../SceneObjects/Sphere.h"
 #include "../SceneObjects/Square.h"
+#include "../SceneObjects/Torus.h"
 #include "../SceneObjects/trimesh.h"
 
 using namespace std;
@@ -314,6 +317,64 @@ void Square::glDrawLocal(int quality, bool actualMaterials,
     glCallList(dispListItr->second);
 }
 
+void Circle::glDrawLocal(int quality, bool actualMaterials,
+                         bool actualTextures) const {
+    // TODO: TBH IDK WHAT THIS DOES
+    // Use this for display lists
+    static std::map<int, GLuint> displayLists;
+
+    std::map<int, GLuint>::iterator dispListItr = displayLists.find(quality);
+    if (dispListItr == displayLists.end()) {
+        dispListItr =
+            (displayLists.insert(std::make_pair(quality, glGenLists(1)))).first;
+        glNewList(dispListItr->second, GL_COMPILE);
+
+        drawTesselatedSquare(quality);
+
+        glEndList();
+    }
+
+    glCallList(dispListItr->second);
+}
+
+void Torus::glDrawLocal(int quality, bool actualMaterials,
+                        bool actualTextures) const {
+    // Use this for display lists
+    static std::map<int, GLuint> displayLists;
+
+    std::map<int, GLuint>::iterator dispListItr = displayLists.find(quality);
+    if (dispListItr == displayLists.end()) {
+        dispListItr =
+            (displayLists.insert(std::make_pair(quality, glGenLists(1)))).first;
+        glNewList(dispListItr->second, GL_COMPILE);
+
+        drawTesselatedSquare(quality);
+
+        glEndList();
+    }
+
+    glCallList(dispListItr->second);
+}
+
+void Quadric::glDrawLocal(int quality, bool actualMaterials,
+                          bool actualTextures) const {
+    // Use this for display lists
+    static std::map<int, GLuint> displayLists;
+
+    std::map<int, GLuint>::iterator dispListItr = displayLists.find(quality);
+    if (dispListItr == displayLists.end()) {
+        dispListItr =
+            (displayLists.insert(std::make_pair(quality, glGenLists(1)))).first;
+        glNewList(dispListItr->second, GL_COMPILE);
+
+        drawTesselatedSquare(quality);
+
+        glEndList();
+    }
+
+    glCallList(dispListItr->second);
+}
+
 void Trimesh::glDrawLocal(int quality, bool actualMaterials,
                           bool actualTextures) const {
     // Could be doing this a lot more efficiently w/ vertex arrays, but that
@@ -374,7 +435,7 @@ void Trimesh::glDrawLocal(int quality, bool actualMaterials,
     glCallList(displayList);
 }
 
-void PointLight::glDraw(GLenum lightID) const {
+void AreaLight::glDraw(GLenum lightID) const {
     GLfloat pos[4];
     pos[0] = GLfloat(position[0]);
     pos[1] = GLfloat(position[1]);
@@ -395,7 +456,7 @@ void PointLight::glDraw(GLenum lightID) const {
     glLightf(lightID, GL_QUADRATIC_ATTENUATION, quadraticTerm);
 }
 
-void PointLight::glDraw() const {
+void AreaLight::glDraw() const {
     GLfloat fColor[4];
     fColor[0] = GLfloat(color[0]);
     fColor[1] = GLfloat(color[1]);
@@ -472,7 +533,7 @@ void PointLight::glDraw() const {
     glPopMatrix();
 }
 
-void AreaLight::glDraw(GLenum lightID) const {
+void PointLight::glDraw(GLenum lightID) const {
     GLfloat pos[4];
     pos[0] = GLfloat(position[0]);
     pos[1] = GLfloat(position[1]);
@@ -493,7 +554,7 @@ void AreaLight::glDraw(GLenum lightID) const {
     glLightf(lightID, GL_QUADRATIC_ATTENUATION, quadraticTerm);
 }
 
-void AreaLight::glDraw() const {
+void PointLight::glDraw() const {
     GLfloat fColor[4];
     fColor[0] = GLfloat(color[0]);
     fColor[1] = GLfloat(color[1]);
