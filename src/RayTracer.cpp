@@ -272,10 +272,9 @@ glm::dvec3 RayTracer::traceRay(ray& r, double thresh, int depth, double& t) {
         }
 
     } else {
-        if(traceUI->cubeMap()) {
+        if (traceUI->cubeMap()) {
             colorC = cubemap->getColor(r);
-        }
-        else
+        } else
             colorC = glm::dvec3(0.0, 0.0, 0.0);
     }
     return colorC;
@@ -364,8 +363,7 @@ void RayTracer::traceSetup(int w, int h) {
     thresh = traceUI->getThreshold();
     samples = traceUI->getSuperSamples();
     aaThresh = traceUI->getAaThreshold();
-    if(traceUI->cubeMap())
-        cubemap = traceUI->getCubeMap();
+    if (traceUI->cubeMap()) cubemap = traceUI->getCubeMap();
 
     // YOUR CODE HERE
     // FIXME: Additional initializations
@@ -418,8 +416,8 @@ int RayTracer::aaImage() {
                                    double(buffer_height * samples);
                         // std::cout << "ran" << std::endl;
                         // https://www.alanzucconi.com/2015/09/16/how-to-sample-from-a-gaussian-distribution/
-                        double dist_min = min(buffer_height * samples,
-                                              buffer_width * samples);
+                        double dist_min = min(1.0 / buffer_height * samples,
+                                              1.0 / buffer_width * samples);
                         std::uniform_real_distribution<double> dist(-1.0, 1.0);
 
                         double u1, u2, s;

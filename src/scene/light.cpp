@@ -18,7 +18,7 @@ double DirectionalLight::distanceAttenuation(const glm::dvec3& P) const {
 glm::dvec3 DirectionalLight::shadowAttenuation(const ray& r,
                                                const glm::dvec3& p) const {
     isect i;
-    ray shadow(r);
+    ray shadow = ray(p, getDirection(p), glm::dvec3(1, 1, 1), ray::SHADOW);
     auto total = glm::dvec3(1.0, 1.0, 1.0);
     // check if inside
     if (this->scene->intersect(shadow, i)) {
@@ -31,7 +31,7 @@ glm::dvec3 DirectionalLight::shadowAttenuation(const ray& r,
                 glm::dvec3 atten(std::pow(trans[0], d), std::pow(trans[1], d),
                                  std::pow(trans[2], d));
 
-                shadow.setPosition(shadow.at(i) + i.getN() * RAY_EPSILON);
+                shadow.setPosition(shadow.at(i) + (i.getN() * 0.0001));
                 atten *= this->shadowAttenuation(shadow, shadow.getPosition());
                 if (traceUI->isThreshold() &&
                     glm::dot(atten, atten) < traceUI->getThreshold())
@@ -39,7 +39,7 @@ glm::dvec3 DirectionalLight::shadowAttenuation(const ray& r,
 
                 return atten;
             } else {
-                shadow.setPosition(shadow.at(i) + i.getN() * -RAY_EPSILON);
+                shadow.setPosition(shadow.at(i) + (-i.getN() * 0.0001));
 
                 return this->shadowAttenuation(shadow, shadow.getPosition());
             }
@@ -69,7 +69,7 @@ glm::dvec3 PointLight::getDirection(const glm::dvec3& P) const {
 glm::dvec3 PointLight::shadowAttenuation(const ray& r,
                                          const glm::dvec3& p) const {
     isect i;
-    ray shadow(r);
+    ray shadow = ray(p, getDirection(p), glm::dvec3(1, 1, 1), ray::SHADOW);
     // calculate length
     double diff = glm::length(p - position);
 
