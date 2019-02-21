@@ -68,8 +68,9 @@ bool Torus::intersectLocal(ray& r, isect& i) const
     i.setN(glm::normalize(N));
 
     // Compute U and V
-    double u = 0.5 + glm::atan(P[2], P[0]) / (2*glm::pi<double>());
-    double v = 0.5 + glm::atan(P[1], sqrt(P[0]*P[0] + P[2]*P[2]) - a) / (2*glm::pi<double>());
+    double u = (1 - (glm::atan(P[2], P[0]) + glm::pi<double>()) / (2*glm::pi<double>()));
+    double v = (glm::atan(P[1], sqrt(P[0]*P[0] + P[2]*P[2]) - a) + glm::pi<double>()) / (2*glm::pi<double>()); 
+
     i.setUVCoordinates(glm::dvec2(u, v));
 
 	i.setObject(this);

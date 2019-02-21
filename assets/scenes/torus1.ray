@@ -14,7 +14,7 @@ directional_light {
 
 point_light {
 	position = (-2, 2, -2);
-	colour = (1, 0.3, 0.3);
+	colour = (1, 1, 1);
 	constant_attenuation_coeff= 0.25;
 	linear_attenuation_coeff = 0.003372407;
 	quadratic_attenuation_coeff = 0.000045492;	
@@ -29,6 +29,12 @@ point_light {
 scale(1.0,
 	rotate(-.75,-.5,-.5,-.75,
 		torus { 
+			material = { 
+				diffuse = map("earth.bmp");
+		//		diffuse = (0.7, 0, 1.0);
+				specular = (0.9,0.4,0.0);
+				shininess = 76.8;
+			};
 		}))
 
 
