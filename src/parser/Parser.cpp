@@ -571,12 +571,12 @@ void Parser::parseQuadric(Scene* scene, TransformNode* transform,
                 _tokenizer.Read(EQUALS);
                 _tokenizer.Read(LPAREN);
                 if (RPAREN != _tokenizer.Peek()->kind()) {
-                    quadric->addVertex(parseVec3d());
+                    quadric->addVertex(parseVec2d());
                     for (;;) {
                         const Token* nextToken = _tokenizer.Peek();
                         if (RPAREN == nextToken->kind()) break;
                         _tokenizer.Read(COMMA);
-                        quadric->addVertex(parseVec3d());
+                        quadric->addVertex(parseVec2d());
                     }
                 }
                 quadric->update();
