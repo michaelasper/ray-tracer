@@ -9,10 +9,13 @@
 #include "../scene/scene.h"
 
 #include "../SceneObjects/Box.h"
+#include "../SceneObjects/Circle.h"
 #include "../SceneObjects/Cone.h"
 #include "../SceneObjects/Cylinder.h"
+#include "../SceneObjects/Quadric.h"
 #include "../SceneObjects/Sphere.h"
 #include "../SceneObjects/Square.h"
+#include "../SceneObjects/Torus.h"
 #include "../SceneObjects/trimesh.h"
 
 using namespace std;
@@ -314,6 +317,64 @@ void Square::glDrawLocal(int quality, bool actualMaterials,
     glCallList(dispListItr->second);
 }
 
+void Circle::glDrawLocal(int quality, bool actualMaterials,
+                         bool actualTextures) const {
+    // TODO: TBH IDK WHAT THIS DOES
+    // Use this for display lists
+    static std::map<int, GLuint> displayLists;
+
+    std::map<int, GLuint>::iterator dispListItr = displayLists.find(quality);
+    if (dispListItr == displayLists.end()) {
+        dispListItr =
+            (displayLists.insert(std::make_pair(quality, glGenLists(1)))).first;
+        glNewList(dispListItr->second, GL_COMPILE);
+
+        drawTesselatedSquare(quality);
+
+        glEndList();
+    }
+
+    glCallList(dispListItr->second);
+}
+
+void Torus::glDrawLocal(int quality, bool actualMaterials,
+                        bool actualTextures) const {
+    // Use this for display lists
+    static std::map<int, GLuint> displayLists;
+
+    std::map<int, GLuint>::iterator dispListItr = displayLists.find(quality);
+    if (dispListItr == displayLists.end()) {
+        dispListItr =
+            (displayLists.insert(std::make_pair(quality, glGenLists(1)))).first;
+        glNewList(dispListItr->second, GL_COMPILE);
+
+        drawTesselatedSquare(quality);
+
+        glEndList();
+    }
+
+    glCallList(dispListItr->second);
+}
+
+void Quadric::glDrawLocal(int quality, bool actualMaterials,
+                          bool actualTextures) const {
+    // Use this for display lists
+    static std::map<int, GLuint> displayLists;
+
+    std::map<int, GLuint>::iterator dispListItr = displayLists.find(quality);
+    if (dispListItr == displayLists.end()) {
+        dispListItr =
+            (displayLists.insert(std::make_pair(quality, glGenLists(1)))).first;
+        glNewList(dispListItr->second, GL_COMPILE);
+
+        drawTesselatedSquare(quality);
+
+        glEndList();
+    }
+
+    glCallList(dispListItr->second);
+}
+
 void Trimesh::glDrawLocal(int quality, bool actualMaterials,
                           bool actualTextures) const {
     // Could be doing this a lot more efficiently w/ vertex arrays, but that
@@ -372,6 +433,104 @@ void Trimesh::glDrawLocal(int quality, bool actualMaterials,
     }
 
     glCallList(displayList);
+}
+
+void AreaLight::glDraw(GLenum lightID) const {
+    GLfloat pos[4];
+    pos[0] = GLfloat(position[0]);
+    pos[1] = GLfloat(position[1]);
+    pos[2] = GLfloat(position[2]);
+    pos[3] = 1.0f;
+    glLightfv(lightID, GL_POSITION, pos);
+
+    GLfloat fColor[4];
+    fColor[0] = GLfloat(color[0]);
+    fColor[1] = GLfloat(color[1]);
+    fColor[2] = GLfloat(color[2]);
+    fColor[3] = 1.0f;
+    glLightfv(lightID, GL_DIFFUSE, fColor);
+    glLightfv(lightID, GL_SPECULAR, fColor);
+
+    glLightf(lightID, GL_CONSTANT_ATTENUATION, constantTerm);
+    glLightf(lightID, GL_LINEAR_ATTENUATION, linearTerm);
+    glLightf(lightID, GL_QUADRATIC_ATTENUATION, quadraticTerm);
+}
+
+void AreaLight::glDraw() const {
+    GLfloat fColor[4];
+    fColor[0] = GLfloat(color[0]);
+    fColor[1] = GLfloat(color[1]);
+    fColor[2] = GLfloat(color[2]);
+    fColor[3] = 1.0f;
+
+    // We'll use this snippet of code to make it a billboard.
+    float modelview[16];
+    int i, j;
+
+    glPushMatrix();
+    // Move to the correct light position
+    glTranslated(position[0], position[1], position[2]);
+
+    // get the current modelview matrix
+    glGetFloatv(GL_MODELVIEW_MATRIX, modelview);
+
+    // undo all rotations/scales
+    for (i = 0; i < 3; i++)
+        for (j = 0; j < 3; j++) {
+            if (i == j)
+                modelview[i * 4 + j] = 1.0;
+            else
+                modelview[i * 4 + j] = 0.0;
+        }
+
+    // set the modelview with no rotations and scaling
+    glLoadMatrixf(modelview);
+    glScaled(0.1, 0.1, 0.1);
+
+    // Now, draw the light.  It will be a neat little circle
+    // with lines emanating
+    glDisable(GL_LIGHTING);
+    glColor3fv(fColor);
+
+    {
+        static GLuint displayList = 0;
+        if (displayList == 0) {
+            displayList = glGenLists(1);
+            glNewList(displayList, GL_COMPILE);
+
+            glBegin(GL_LINE_STRIP);
+            {
+                const int circlePoints = 24;
+                for (i = 0; i <= circlePoints; i++) {
+                    const double angle =
+                        (double(i) / double(circlePoints)) * (2.0 * pi);
+                    glVertex3d(cos(angle), sin(angle), 0.0);
+                }
+            }
+            glEnd();
+
+            glBegin(GL_LINES);
+            {
+                const int numLines = 8;
+                for (i = 0; i < numLines; i++) {
+                    const double angle =
+                        (double(i) / double(numLines)) * (2.0 * pi);
+                    glVertex3d(1.3 * cos(angle), 1.3 * sin(angle), 0.0);
+                    glVertex3d(2.0 * cos(angle), 2.0 * sin(angle), 0.0);
+                }
+            }
+            glEnd();
+
+            glEndList();
+        }
+
+        glCallList(displayList);
+    }
+
+    glEnable(GL_LIGHTING);
+
+    // restores the modelview matrix
+    glPopMatrix();
 }
 
 void PointLight::glDraw(GLenum lightID) const {

@@ -43,6 +43,7 @@ enum SYMBOL {
     SEMICOLON,
 
     CAMERA,       // camera primitive
+    AREA_LIGHT,
     POINT_LIGHT,  // lights
     DIRECTIONAL_LIGHT,
     AMBIENT_LIGHT,
@@ -56,6 +57,8 @@ enum SYMBOL {
     SQUARE,
     CYLINDER,
     CONE,
+    QUADRIC,
+    TORUS,
     TRIMESH,
 
     POSITION,

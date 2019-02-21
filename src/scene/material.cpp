@@ -21,25 +21,64 @@ glm::dvec3 Material::shade(Scene* scene, const ray& r, const isect& i) const {
     glm::dvec3 intensity = ke(i) + ka(i) * Ia;
     glm::dvec3 pos = r.at(i);
     double alpha = shininess(i);
+    if (!traceUI->toonSwitch()) {
+        // iterate through all the lights
+        for (const auto& pLight : scene->getAllLights()) {
+            glm::dvec3 l = pLight->getDirection(pos);
+            glm::dvec3 reflect = 2 * glm::dot(l, normal) * normal - l;
 
-    // iterate through all the lights
-    for (const auto& pLight : scene->getAllLights()) {
-        glm::dvec3 l = pLight->getDirection(pos);
-        glm::dvec3 reflect = 2 * glm::dot(l, normal) * normal - l;
+            glm::dvec3 atten = pLight->getColor();
+            atten *= glm::clamp(1.0, 0.0, pLight->distanceAttenuation(pos));
+            ray shadow(pos + 1e-7 * normal, l, glm::dvec3(1.0, 1.0, 1.0),
+                       ray::SHADOW);
+            atten *= pLight->shadowAttenuation(shadow, pos + 1e-7 * normal);
 
-        glm::dvec3 atten = pLight->getColor();
-        atten *= glm::clamp(1.0, 0.0, pLight->distanceAttenuation(pos));
-        ray shadow(pos + 1e-7 * normal, l, glm::dvec3(1.0, 1.0, 1.0),
-                   ray::SHADOW);
-        atten *= pLight->shadowAttenuation(shadow, pos + 1e-7 * normal);
+            // Phong Model
+            auto diffuse = kd(i) * (i.getMaterial().Trans()
+                                        ? abs(glm::dot(l, normal))
+                                        : max(glm::dot(l, normal), 0.0));
+            auto spec = ks(i) * pow(max(glm::dot(v, reflect), 0.0), alpha);
 
-        // Phong Model
-        auto diffuse =
-            kd(i) * (i.getMaterial().Trans() ? abs(glm::dot(l, normal))
-                                             : max(glm::dot(l, normal), 0.0));
-        auto spec = ks(i) * pow(max(glm::dot(v, reflect), 0.0), alpha);
+            intensity += atten * (diffuse + spec);
+        }
+    } else {
+        int levels = 5;
+        double scale = 1.0 / levels;
+        
 
-        intensity += atten * (diffuse + spec);
+        for (const auto& pLight : scene->getAllLights()) {
+            glm::dvec3 l = pLight->getDirection(pos);
+            glm::dvec3 reflect = 2 * glm::dot(l, normal) * normal - l;
+
+            glm::dvec3 atten = pLight->getColor();
+            atten *= glm::clamp(1.0, 0.0, pLight->distanceAttenuation(pos));
+            ray shadow(pos + 1e-7 * normal, l, glm::dvec3(1.0, 1.0, 1.0),
+                       ray::SHADOW);
+            atten *= pLight->shadowAttenuation(shadow, pos + 1e-7 * normal);
+
+            // Phong Model
+            double val = glm::dot(l, normal);
+            glm::dvec3 diffuse;
+            if (val < 0) {
+                val = 0.0;
+            }
+
+            auto h = glm::normalize(l + v);
+            diffuse = kd(i) *
+                      (i.getMaterial().Trans() ? abs(glm::dot(l, normal))
+                                               : floor(val * levels)) *
+                      scale;
+
+            auto spec = ks(i) * pow(max(glm::dot(h, normal), 0.0), alpha);
+            auto mask = pow(max(glm::dot(v, normal), 0.0), alpha) > 0.2 ? 1 : 0;
+            spec *= mask;
+
+            // Edge Detection
+            intensity += atten * (diffuse + spec);
+        }
+
+        double edge = glm::dot(v, normal) > 0.2 ? 1.0 : 0.0;
+        edge* intensity;
     }
 
     return intensity;

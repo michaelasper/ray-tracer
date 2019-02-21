@@ -6,6 +6,12 @@
 ./fileio/pngimage.cpp
 ./fileio/buffer.cpp
 ./SceneObjects/Sphere.cpp
+./SceneObjects/Circle.h
+./SceneObjects/Circle.cc
+./SceneObjects/Torus.h
+./SceneObjects/Torus.cc
+./SceneObjects/Quadric.cc
+./SceneObjects/Quadric.h
 ./SceneObjects/trimesh.cpp
 ./SceneObjects/Cylinder.cpp
 ./SceneObjects/Cone.h

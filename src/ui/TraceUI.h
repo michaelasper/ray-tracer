@@ -48,6 +48,7 @@ class TraceUI {
     int get3dMode() const { return m_3d_mode; }
     bool aaSwitch() const { return m_antiAlias; }
     bool ssSwitch() const { return m_stochaticAlias; }
+    bool toonSwitch() const { return m_toon; }
     bool dSwitch() const { return m_depthOfField; }
     bool dddSwitch() const { return m_render3d; }
     bool kdSwitch() const { return m_kdTree; }
@@ -133,6 +134,7 @@ class TraceUI {
                 // translucent object.
     bool m_render3d = false;
     bool m_depthOfField = false;
+    bool m_toon = false;
 
     std::unique_ptr<CubeMap> cubemap;
 

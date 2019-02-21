@@ -16,8 +16,10 @@
 #include "../SceneObjects/Box.h"
 #include "../SceneObjects/Cone.h"
 #include "../SceneObjects/Cylinder.h"
+#include "../SceneObjects/Quadric.h"
 #include "../SceneObjects/Sphere.h"
 #include "../SceneObjects/Square.h"
+#include "../SceneObjects/Torus.h"
 #include "../SceneObjects/trimesh.h"
 #include "../scene/light.h"
 #include "../scene/scene.h"
@@ -59,6 +61,7 @@ class Parser {
                        const Material& mat);
 
     // Parse lights
+    AreaLight* parseAreaLight(Scene* scene);
     PointLight* parsePointLight(Scene* scene);
     DirectionalLight* parseDirectionalLight(Scene* scene);
     void parseAmbientLight(Scene* scene);
@@ -71,7 +74,11 @@ class Parser {
                      const Material& mat);
     void parseCylinder(Scene* scene, TransformNode* transform,
                        const Material& mat);
+    void parseQuadric(Scene* scene, TransformNode* transform,
+                      const Material& mat);
     void parseCone(Scene* scene, TransformNode* transform, const Material& mat);
+    void parseTorus(Scene* scene, TransformNode* transform,
+                    const Material& mat);
     void parseTrimesh(Scene* scene, TransformNode* transform,
                       const Material& mat);
     void parseFaces(std::list<glm::dvec3>& faces);
@@ -89,6 +96,7 @@ class Parser {
     // Helper functions for parsing expressions of the form:
     //   keyword = value;
     double parseScalarExpression();
+    // glm::dvec2 parseVec2dExpression();
     glm::dvec3 parseVec3dExpression();
     glm::dvec4 parseVec4dExpression();
     bool parseBooleanExpression();
@@ -102,6 +110,7 @@ class Parser {
     // and idents.
     double parseScalar();
     std::list<double> parseScalarList();
+    glm::dvec2 parseVec2d();
     glm::dvec3 parseVec3d();
     glm::dvec4 parseVec4d();
     bool parseBoolean();

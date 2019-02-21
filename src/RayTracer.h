@@ -66,6 +66,7 @@ class RayTracer {
     double aaThresh;
     int samples;
     std::unique_ptr<Scene> scene;
+    CubeMap* cubemap;
 
     bool m_bBufferReady;
 };

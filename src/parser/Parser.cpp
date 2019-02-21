@@ -47,6 +47,8 @@ Scene* Parser::parseScene() {
             case SQUARE:
             case CYLINDER:
             case CONE:
+            case QUADRIC:
+            case TORUS:
             case TRIMESH:
             case TRANSLATE:
             case ROTATE:
@@ -54,6 +56,9 @@ Scene* Parser::parseScene() {
             case TRANSFORM:
             case LBRACE:
                 parseTransformableElement(scene, &scene->transformRoot, *mat);
+                break;
+            case AREA_LIGHT:
+                scene->add(parseAreaLight(scene));
                 break;
             case POINT_LIGHT:
                 scene->add(parsePointLight(scene));
@@ -155,9 +160,11 @@ void Parser::parseTransformableElement(Scene* scene, TransformNode* transform,
         case SQUARE:
         case CYLINDER:
         case CONE:
+        case QUADRIC:
         case TRIMESH:
         case TRANSLATE:
         case ROTATE:
+        case TORUS:
         case SCALE:
         case TRANSFORM:
             parseGeometry(scene, transform, mat);
@@ -184,6 +191,7 @@ void Parser::parseGroup(Scene* scene, TransformNode* transform,
             case SQUARE:
             case CYLINDER:
             case CONE:
+            case QUADRIC:
             case TRIMESH:
             case TRANSLATE:
             case ROTATE:
@@ -225,6 +233,12 @@ void Parser::parseGeometry(Scene* scene, TransformNode* transform,
             return;
         case CONE:
             parseCone(scene, transform, mat);
+            return;
+        case QUADRIC:
+            parseQuadric(scene, transform, mat);
+            return;
+        case TORUS:
+            parseTorus(scene, transform, mat);
             return;
         case TRIMESH:
             parseTrimesh(scene, transform, mat);
@@ -526,6 +540,94 @@ void Parser::parseCone(Scene* scene, TransformNode* transform,
     }
 }
 
+void Parser::parseQuadric(Scene* scene, TransformNode* transform,
+                          const Material& mat) {
+    _tokenizer.Read(QUADRIC);
+    _tokenizer.Read(LBRACE);
+
+    Quadric* quadric;
+    Material* newMat = 0;
+
+    // double bottomRadius = 1.0;
+    // double topRadius = 0.0;
+    // double height = 1.0;
+    // bool capped = true;				// Capped by default
+
+    for (;;) {
+        const Token* t = _tokenizer.Peek();
+
+        switch (t->kind()) {
+            case MATERIAL:
+                delete newMat;
+                newMat = parseMaterialExpression(scene, mat);
+                break;
+            case NAME:
+                parseIdentExpression();
+                break;
+                /*
+            case POLYPOINTS:
+                _tokenizer.Read(POLYPOINTS);
+                _tokenizer.Read(EQUALS);
+                _tokenizer.Read(LPAREN);
+                if (RPAREN != _tokenizer.Peek()->kind()) {
+                    //tmesh->addVertex(parseVec3d());
+                    for (;;) {
+                        const Token* nextToken = _tokenizer.Peek();
+                        if (RPAREN == nextToken->kind()) break;
+                        _tokenizer.Read(COMMA);
+                        tmesh->addVertex(parseVec3d());
+                    }
+                }
+                _tokenizer.Read(RPAREN);
+                _tokenizer.Read(SEMICOLON);
+                break;
+                */
+            case RBRACE:
+                _tokenizer.Read(RBRACE);
+                quadric =
+                    new Quadric(scene, newMat ? newMat : new Material(mat));
+                quadric->setTransform(transform);
+                scene->add(quadric);
+                return;
+            default:
+                throw SyntaxErrorException("Expected: quadric attributes",
+                                           _tokenizer);
+        }
+    }
+}
+
+void Parser::parseTorus(Scene* scene, TransformNode* transform,
+                        const Material& mat) {
+    Torus* torus = 0;
+    Material* newMat = 0;
+
+    _tokenizer.Read(TORUS);
+    _tokenizer.Read(LBRACE);
+
+    for (;;) {
+        const Token* t = _tokenizer.Peek();
+
+        switch (t->kind()) {
+            case MATERIAL:
+                delete newMat;
+                newMat = parseMaterialExpression(scene, mat);
+                break;
+            case NAME:
+                parseIdentExpression();
+                break;
+            case RBRACE:
+                _tokenizer.Read(RBRACE);
+                torus = new Torus(scene, newMat ? newMat : new Material(mat));
+                torus->setTransform(transform);
+                scene->add(torus);
+                return;
+            default:
+                throw SyntaxErrorException("Expected: torus attributes",
+                                           _tokenizer);
+        }
+    }
+}
+
 void Parser::parseTrimesh(Scene* scene, TransformNode* transform,
                           const Material& mat) {
     Trimesh* tmesh = new Trimesh(scene, new Material(mat), transform);
@@ -758,6 +860,84 @@ PointLight* Parser::parsePointLight(Scene* scene) {
     }
 }
 
+AreaLight* Parser::parseAreaLight(Scene* scene) {
+    glm::dvec3 position;
+    float radius;
+    glm::dvec3 color;
+
+    // Default to the 'default' system
+    float constantAttenuationCoefficient = 0.0f;
+    float linearAttenuationCoefficient = 0.0f;
+    float quadraticAttenuationCoefficient = 1.0f;
+
+    bool hasPosition(false), hasColor(false), hasRadius(false);
+
+    _tokenizer.Read(AREA_LIGHT);
+    _tokenizer.Read(LBRACE);
+
+    for (;;) {
+        const Token* t = _tokenizer.Peek();
+        switch (t->kind()) {
+            case POSITION:
+                if (hasPosition)
+                    throw SyntaxErrorException("Repeated 'position' attribute",
+                                               _tokenizer);
+                position = parseVec3dExpression();
+                hasPosition = true;
+                break;
+            case BOTTOM_RADIUS:
+                if (hasRadius)
+                    throw SyntaxErrorException("Repeated 'radius' attribute",
+                                               _tokenizer);
+                radius = parseScalarExpression();
+                hasRadius = true;
+                break;
+            case COLOR:
+                if (hasColor)
+                    throw SyntaxErrorException("Repeated 'color' attribute",
+                                               _tokenizer);
+                color = parseVec3dExpression();
+                hasColor = true;
+                break;
+
+            case CONSTANT_ATTENUATION_COEFF:
+                constantAttenuationCoefficient = parseScalarExpression();
+                break;
+
+            case LINEAR_ATTENUATION_COEFF:
+                linearAttenuationCoefficient = parseScalarExpression();
+                break;
+
+            case QUADRATIC_ATTENUATION_COEFF:
+                quadraticAttenuationCoefficient = parseScalarExpression();
+                break;
+
+            case RBRACE:
+                if (!hasColor)
+                    throw SyntaxErrorException("Expected: 'color'", _tokenizer);
+                if (!hasPosition)
+                    throw SyntaxErrorException("Expected: 'position'",
+                                               _tokenizer);
+                if (!hasRadius)
+                    throw SyntaxErrorException("Expected: 'radius'",
+                                               _tokenizer);
+
+                _tokenizer.Read(RBRACE);
+                return new AreaLight(scene, position, radius, color,
+                                     constantAttenuationCoefficient,
+                                     linearAttenuationCoefficient,
+                                     quadraticAttenuationCoefficient);
+
+            default:
+                throw SyntaxErrorException(
+                    "expecting 'position' or 'color' attribute, or "
+                    "'constant_attenuation_coeff', 'linear_attenuation_coeff', "
+                    "or 'quadratic_attenuation_coeff'",
+                    _tokenizer);
+        }
+    }
+}
+
 DirectionalLight* Parser::parseDirectionalLight(Scene* scene) {
     glm::dvec3 direction;
     glm::dvec3 color;
@@ -895,6 +1075,17 @@ bool Parser::parseBoolean() {
         return false;
     }
     throw SyntaxErrorException("Expected boolean", _tokenizer);
+}
+
+glm::dvec2 Parser::parseVec2d() {
+    _tokenizer.Read(LPAREN);
+    unique_ptr<Token> value1(_tokenizer.Read(SCALAR));
+    _tokenizer.Read(COMMA);
+    unique_ptr<Token> value2(_tokenizer.Read(SCALAR));
+
+    _tokenizer.Read(RPAREN);
+
+    return glm::dvec2(value1->value(), value2->value());
 }
 
 glm::dvec3 Parser::parseVec3d() {

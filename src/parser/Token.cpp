@@ -41,6 +41,7 @@ string getNameForToken(const SYMBOL kind) {
         tokenNames[SEMICOLON] = "Semicolon";
         tokenNames[CAMERA] = "camera";
         tokenNames[AMBIENT_LIGHT] = "ambient_light";
+        tokenNames[AREA_LIGHT] = "area_light";
         tokenNames[POINT_LIGHT] = "point_light";
         tokenNames[DIRECTIONAL_LIGHT] = "directional_light";
         tokenNames[CONSTANT_ATTENUATION_COEFF] = "constant_attenuation_coeff";
@@ -51,6 +52,8 @@ string getNameForToken(const SYMBOL kind) {
         tokenNames[SQUARE] = "square";
         tokenNames[CYLINDER] = "cylinder";
         tokenNames[CONE] = "cone";
+        tokenNames[QUADRIC] = "quadric";
+        tokenNames[TORUS] = "torus";
         tokenNames[TRIMESH] = "trimesh";
         tokenNames[POSITION] = "position";
         tokenNames[VIEWDIR] = "viewdir";
@@ -110,6 +113,7 @@ SYMBOL lookupReservedWord(const string& ident) {
     if (reservedWords.empty()) {
         reservedWords["ambient_light"] = AMBIENT_LIGHT;
         reservedWords["ambient"] = AMBIENT;
+        reservedWords["area_light"] = AREA_LIGHT;
         reservedWords["aspectratio"] = ASPECTRATIO;
         reservedWords["bottom_radius"] = BOTTOM_RADIUS;
         reservedWords["box"] = BOX;
@@ -136,6 +140,8 @@ SYMBOL lookupReservedWord(const string& ident) {
         reservedWords["materials"] = MATERIALS;
         reservedWords["map"] = MAP;
         reservedWords["name"] = NAME;
+        reservedWords["quadric"] = QUADRIC;
+        reservedWords["torus"] = TORUS;
         reservedWords["normals"] = NORMALS;
         reservedWords["point_light"] = POINT_LIGHT;
         reservedWords["points"] = POLYPOINTS;
