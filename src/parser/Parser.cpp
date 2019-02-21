@@ -563,18 +563,22 @@ void Parser::parseQuadric(Scene* scene, TransformNode* transform,
             case NAME:
                 parseIdentExpression();
                 break;
-            // case CAPPED:
-            //  capped = parseBooleanExpression();
-            //  break;
-            // case BOTTOM_RADIUS:
-            //  bottomRadius = parseScalarExpression();
-            //  break;
-            // case TOP_RADIUS:
-            //  topRadius = parseScalarExpression();
-            //  break;
-            // case HEIGHT:
-            //  height = parseScalarExpression();
-            //  break;
+            case POLYPOINTS:
+                _tokenizer.Read(POLYPOINTS);
+                _tokenizer.Read(EQUALS);
+                _tokenizer.Read(LPAREN);
+                if (RPAREN != _tokenizer.Peek()->kind()) {
+                    tmesh->addVertex(parseVec3d());
+                    for (;;) {
+                        const Token* nextToken = _tokenizer.Peek();
+                        if (RPAREN == nextToken->kind()) break;
+                        _tokenizer.Read(COMMA);
+                        tmesh->addVertex(parseVec3d());
+                    }
+                }
+                _tokenizer.Read(RPAREN);
+                _tokenizer.Read(SEMICOLON);
+                break;
             case RBRACE:
                 _tokenizer.Read(RBRACE);
                 quadric =
@@ -1068,6 +1072,17 @@ bool Parser::parseBoolean() {
         return false;
     }
     throw SyntaxErrorException("Expected boolean", _tokenizer);
+}
+
+glm::dvec2 Parser::parseVec2d() {
+    _tokenizer.Read(LPAREN);
+    unique_ptr<Token> value1(_tokenizer.Read(SCALAR));
+    _tokenizer.Read(COMMA);
+    unique_ptr<Token> value2(_tokenizer.Read(SCALAR));
+
+    _tokenizer.Read(RPAREN);
+
+    return glm::dvec2(value1->value(), value2->value());
 }
 
 glm::dvec3 Parser::parseVec3d() {

@@ -96,6 +96,7 @@ class Parser {
     // Helper functions for parsing expressions of the form:
     //   keyword = value;
     double parseScalarExpression();
+    // glm::dvec2 parseVec2dExpression();
     glm::dvec3 parseVec3dExpression();
     glm::dvec4 parseVec4dExpression();
     bool parseBooleanExpression();
@@ -109,6 +110,7 @@ class Parser {
     // and idents.
     double parseScalar();
     std::list<double> parseScalarList();
+    glm::dvec2 parseVec2d();
     glm::dvec3 parseVec3d();
     glm::dvec4 parseVec4d();
     bool parseBoolean();
