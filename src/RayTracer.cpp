@@ -152,6 +152,14 @@ glm::dvec3 RayTracer::tracePixel(int i, int j) {
                                  glm::dvec3(0.0, .587, .587),
                                  glm::dvec3(0.0, .114, .114));
                 break;
+            case 1:
+                red = glm::mat3(glm::dvec3(.299, 0.0, 0.0),
+                                glm::dvec3(.587, 0.0, 0.0),
+                                glm::dvec3(.114, 0.0, 0.0));
+                blue = glm::mat3(glm::dvec3(0.0, 0.0, 0.0),
+                                 glm::dvec3(0.0, 1.0, 0.0),
+                                 glm::dvec3(0.0, 0.0, 1.0));
+                break;
             default:
                 break;
         }
