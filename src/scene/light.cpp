@@ -69,7 +69,7 @@ glm::dvec3 PointLight::getDirection(const glm::dvec3& P) const {
 glm::dvec3 PointLight::shadowAttenuation(const ray& r,
                                          const glm::dvec3& p) const {
     isect i;
-    ray shadow(r);
+    ray shadow = ray(p, getDirection(p), glm::dvec3(1, 1, 1), ray::SHADOW);
     // calculate length
     double diff = glm::length(p - position);
 

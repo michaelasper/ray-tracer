@@ -32,7 +32,9 @@ We have scenes in the quadrics/torus folders
 
 ### Depth of field
 
-Use `-q [focalDistance] [aperatureSize]`
+Use `-q [focalDistance]` and `-e [aperature size]`
+
+Must use q!
 
 ### 3D Images
 

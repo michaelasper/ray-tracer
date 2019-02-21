@@ -54,8 +54,11 @@ CommandLineUI::CommandLineUI(int argc, char** argv) : TraceUI() {
                 break;
             case 'q':
                 m_depthOfField = true;
+                m_focalDistance = atoi(optarg);
                 break;
-                // m_focalDistance = atoi(optarg);
+            case 'e':
+                m_ApSize = atof(optarg);
+                break;
             case 'd':
                 m_3d_mode = atoi(optarg);
                 m_render3d = true;
