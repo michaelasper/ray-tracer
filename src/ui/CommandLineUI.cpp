@@ -1,6 +1,8 @@
 #include <stdarg.h>
 #include <time.h>
 #include <iostream>
+#include <sstream>
+#include <vector>
 #ifndef _MSC_VER
 #include <unistd.h>
 #else
@@ -25,7 +27,7 @@ CommandLineUI::CommandLineUI(int argc, char** argv) : TraceUI() {
     progName = argv[0];
     const char* jsonfile = nullptr;
     string cubemap_file;
-    while ((i = getopt(argc, argv, "tr:w:hj:c:z:d:a:f:q:ne:")) != EOF) {
+    while ((i = getopt(argc, argv, "tr:w:hj:c:z:d:a:f:q:ne:p:")) != EOF) {
         switch (i) {
             case 'r':
                 m_nDepth = atoi(optarg);
@@ -65,6 +67,28 @@ CommandLineUI::CommandLineUI(int argc, char** argv) : TraceUI() {
             case 'n':
                 m_toon = true;
                 break;
+            case 'p': {
+                m_path = true;
+                std::istringstream iss(optarg);
+                std::vector<std::string> tokens;
+                std::string token;
+                while (std::getline(iss, token, '.')) {
+                    if (!token.empty()) tokens.push_back(token);
+                }
+
+                if (tokens.size() == 4) {
+                    m_pathSamples = atoi(tokens[0].c_str());
+                    m_monte_carlo = atoi(tokens[1].c_str());
+                    m_light_rad = atoi(tokens[2].c_str());
+                    m_light_samples = atoi(tokens[3].c_str());
+                } else {
+                    std::cerr << "Overwriting path tracing input" << std::endl;
+                    m_pathSamples = 20;
+                    m_monte_carlo = 2;
+                    m_light_rad = 5;
+                    m_light_samples = 100;
+                }
+            } break;
             case 'h':
                 usage();
                 exit(1);
@@ -110,7 +134,6 @@ int CommandLineUI::run() {
             raytracer->aaImage();
             raytracer->waitRender();
         }
-
 
         end = clock();
 

@@ -3,6 +3,7 @@
 
 #ifndef _WIN32
 #include <algorithm>
+#include <random>
 using std::max;
 using std::min;
 #endif
@@ -21,9 +22,14 @@ class Light : public SceneElement {
 
    protected:
     Light(Scene* scene, const glm::dvec3& col)
-        : SceneElement(scene), color(col) {}
+        : SceneElement(scene), color(col) {
+        // std::mt19937 eng(rd());
+    }
 
     glm::dvec3 color;
+    // std::random_device rd;
+
+    // std::mt19937 eng;
 
    public:
     virtual void glDraw(GLenum lightID) const {}

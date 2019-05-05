@@ -46,9 +46,20 @@ glm::dvec3 RayTracer::trace(double x, double y) {
     glm::dvec3 ret;
     if (traceUI->isThreshold()) {
         // std::cout << "ran" << std::endl;
-        ret = traceRay(r, traceUI->getThreshold(), traceUI->getDepth(), dummy);
+        if (traceUI->pathTrace()) {
+            ret = traceRay(r, traceUI->getThreshold(), traceUI->getDepth(),
+                           (int)traceUI->getMC(), dummy);
+        } else {
+            ret = traceRay(r, traceUI->getThreshold(), traceUI->getDepth(), 0,
+                           dummy);
+        }
     } else {
-        ret = traceRay(r, 0.0, traceUI->getDepth(), dummy);
+        if (traceUI->pathTrace()) {
+            ret = traceRay(r, 0.0, traceUI->getDepth(), (int)traceUI->getMC(),
+                           dummy);
+        } else {
+            ret = traceRay(r, 0.0, traceUI->getDepth(), 0, dummy);
+        }
     }
     // http://cg.skeelogy.com/depth-of-field-using-raytracing/
     // https://stackoverflow.com/questions/13532947/references-for-depth-of-field-implementation-in-a-raytracer
@@ -109,7 +120,7 @@ glm::dvec3 RayTracer::trace(double x, double y) {
             // focal point. Note that it will not necessarily pass through the
             // same pixel, that's ok.
 
-            ret += traceRay(r, traceUI->getThreshold(), traceUI->getDepth(),
+            ret += traceRay(r, traceUI->getThreshold(), traceUI->getDepth(), 0,
                             dummy);
         }
 
@@ -178,20 +189,6 @@ glm::dvec3 RayTracer::tracePixel(int i, int j) {
 
 #define VERBOSE 0
 
-// Do recursive ray tracing!  You'll want to insert a lot of code here
-// (or places called from here) to handle reflection, refraction, etc etc.
-
-// YOUR CODE HERE
-
-// An intersection occurred!  We've got work to do.  For now,
-// this code gets the material for the surface that was intersected,
-// and asks that material to provide a color for the ray.
-
-// This is a great place to insert code for recursive ray tracing.
-// Instead of just returning the result of shade(), add some
-// more steps: add in the contributions from reflected and refracted
-// rays.
-
 ray reflectDirection(ray& r, const isect& i) {
     glm::dvec3 w_in = r.getDirection();
     auto w_ref = w_in - 2 * glm::dot(w_in, i.getN()) * i.getN();
@@ -199,7 +196,8 @@ ray reflectDirection(ray& r, const isect& i) {
                ray::REFLECTION);
 }
 
-glm::dvec3 RayTracer::traceRay(ray& r, double thresh, int depth, double& t) {
+glm::dvec3 RayTracer::traceRay(ray& r, double thresh, int depth, int monte,
+                               double& t) {
     isect i;
     glm::dvec3 colorC;
 
@@ -213,12 +211,52 @@ glm::dvec3 RayTracer::traceRay(ray& r, double thresh, int depth, double& t) {
 
         t = i.getT();
         bool inside = glm::dot(-r.getDirection(), i.getN()) < 0;
+
+        if (traceUI->pathTrace()) {
+            // do stuff
+            if (monte > 0 && r.type() == ray::VISIBILITY) {
+                // do actual stuff
+                glm::dvec3 ptColor(0.0);
+                double numSamples = traceUI->getPathSamples() /
+                                    std::max(traceUI->getMC() - monte, 1.0);
+                std::uniform_real_distribution<double> dist(0.0, 1.0);
+                for (int count = 0; count < numSamples; count++) {
+                    // Shoot random  rays
+
+                    // MAKE A RANDOM RAY
+                    double r1 = dist(eng);
+                    double r2 = dist(eng);
+
+                    double rad = sqrt(r1);
+                    double theta = 2 * r2 * glm::pi<double>();
+
+                    double x = rad * cos(theta);
+                    double y = rad * sin(theta);
+
+                    glm::dvec3 newDir(x, y, sqrt(max(0.0, 1 - r1)));
+                    glm::dvec3 newPt =
+                        (r.getPosition() + i.getT() * r.getDirection()) -
+                        RAY_EPSILON * r.getDirection();
+
+                    ray newRay(newPt, newDir, glm::dvec3(1.0), ray::VISIBILITY);
+                    glm::dvec3 rayColor =
+                        traceRay(newRay, thresh, depth - 1, monte - 1, t);
+
+                    ptColor += glm::dot(i.getN(), newDir) * rayColor;
+                }
+
+                double albedo = 1.0;
+                colorC += ptColor * (1.0 / traceUI->getPathSamples()) * albedo;
+            }
+        }
+
         // Reflections
         if (m.Refl() && !inside) {
             auto reflect = reflectDirection(r, i);
             auto new_depth = depth - 1;
             double newT = 0;
-            colorC += traceRay(reflect, thresh, new_depth, newT) * m.kr(i);
+            colorC +=
+                traceRay(reflect, thresh, new_depth, monte, newT) * m.kr(i);
         }
 
         // Refractions
@@ -245,7 +283,7 @@ glm::dvec3 RayTracer::traceRay(ray& r, double thresh, int depth, double& t) {
                 ray refract = ray(pos, T, r.getAtten(),
                                   (inside ? ray::VISIBILITY : ray::REFRACTION));
                 double newT = 0;
-                auto temp = traceRay(refract, thresh, new_depth, newT);
+                auto temp = traceRay(refract, thresh, new_depth, monte, newT);
 
                 if (!inside)
                     temp *= glm::dvec3(std::pow(m.kt(i)[0], newT),
@@ -260,7 +298,7 @@ glm::dvec3 RayTracer::traceRay(ray& r, double thresh, int depth, double& t) {
                             r.getAtten(), ray::REFLECTION);
                 reflect.setPosition(r.at(i) - RAY_EPSILON * N);
                 double newT = 0;
-                auto temp = traceRay(reflect, thresh, new_depth, newT);
+                auto temp = traceRay(reflect, thresh, new_depth, monte, newT);
 
                 if (!inside)
                     temp *= glm::dvec3(std::pow(m.kt(i)[0], newT),

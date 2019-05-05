@@ -1,5 +1,6 @@
 {
     "files.associations": {
+        "*.toml": "toml",
         "__functional_base": "cpp",
         "array": "cpp",
         "istream": "cpp",
@@ -69,6 +70,9 @@
         "vector": "cpp",
         "cfenv": "cpp",
         "random": "cpp",
-        "stack": "cpp"
+        "stack": "cpp",
+        "*.tcc": "cpp",
+        "unordered_map": "cpp",
+        "optional": "cpp"
     }
 }

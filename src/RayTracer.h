@@ -29,7 +29,8 @@ class RayTracer {
     ~RayTracer();
 
     glm::dvec3 tracePixel(int i, int j);
-    glm::dvec3 traceRay(ray& r, double thresh, int depth, double& length);
+    glm::dvec3 traceRay(ray& r, double thresh, int depth, int monte,
+                        double& length);
 
     glm::dvec3 getPixel(int i, int j);
     void setPixel(int i, int j, glm::dvec3 color);

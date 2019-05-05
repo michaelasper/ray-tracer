@@ -68,6 +68,96 @@ glm::dvec3 PointLight::getDirection(const glm::dvec3& P) const {
 
 glm::dvec3 PointLight::shadowAttenuation(const ray& r,
                                          const glm::dvec3& p) const {
+    if (traceUI->pathTrace()) {
+        std::random_device rd;
+        std::mt19937 eng(rd());
+        double lightRadius = traceUI->getLightRadius();
+        double lightSamples = traceUI->getLightSamples();
+        std::uniform_real_distribution<double> radiuss(0.0, lightRadius);
+        std::uniform_real_distribution<double> dist(0.0, 1.0);
+        glm::dvec3 result(0.0);
+        for (int s = 0; s < (int)lightSamples; ++s) {
+            glm::dvec3 shadowDir = this->getDirection(p);
+            double radius = dist(eng);
+
+            // MAKE A RANDOM RAY
+            double r1 = dist(eng);
+            double r2 = dist(eng);
+
+            double rad = sqrt(r1);
+            double theta = 2 * r2 * glm::pi<double>();
+
+            double x = rad * cos(theta);
+            double y = rad * sin(theta);
+
+            glm::dvec3 randomDir(x, y, sqrt(max(0.0, 1 - r1)));
+
+            auto shift = glm::normalize(glm::cross(shadowDir, randomDir));
+
+            auto newPosition = position + shift * radius;
+
+            auto randomShadow = glm::normalize(newPosition - p);
+
+            ray shadow(p - RAY_EPSILON * r.getDirection(), randomShadow,
+                       glm::dvec3(1.0), ray::SHADOW);
+
+            isect i;
+            if (!scene->intersect(shadow, i)) {
+                result += glm::dvec3(1.0);
+                continue;
+            }
+
+            double i_dist = i.getT();
+            double lightDist = glm::l2Norm(this->position - p);
+            if (i_dist > lightDist) {
+                result += glm::dvec3(1.0);
+                continue;
+            }
+
+            // if (!i.getMaterial().Trans()) {
+            //     result += glm::dvec3(0.0);
+            //     continue;
+            // }
+
+            glm::dvec3 isectPt =
+                shadow.getPosition() + i.getT() * shadow.getDirection();
+            glm::dvec3 isectPtMod =
+                isectPt + 2 * RAY_EPSILON * shadow.getDirection();
+
+            // check if inside or outside
+            if (glm::dot(i.getN(), shadow.getDirection()) > 0) {
+                double d = i.getT();
+                glm::dvec3 atten =
+                    glm::pow(i.getMaterial().kt(i), glm::dvec3(d));
+                ray shadow2(isectPtMod, shadow.getDirection(), glm::dvec3(1.0),
+                            ray::SHADOW);
+                result += atten * this->shadowAttenuation(shadow2, isectPtMod);
+            } else {
+                ray bounce(isectPt + RAY_EPSILON * shadow.getDirection(),
+                           shadow.getDirection(), glm::dvec3(1.0), ray::SHADOW);
+                isect i2;
+                if (!scene->intersect(bounce, i2)) {
+                    result += glm::dvec3(1.0);
+                } else {
+                    double d = i2.getT();
+                    glm::dvec3 isectPt2 =
+                        bounce.getPosition() + d * bounce.getDirection();
+                    glm::dvec3 isectPt2Mod =
+                        isectPt2 + 2 * RAY_EPSILON * bounce.getDirection();
+                    glm::dvec3 atten =
+                        glm::pow(i.getMaterial().kt(i), glm::dvec3(d));
+                    ray shadow2(isectPt2Mod, bounce.getDirection(),
+                                glm::dvec3(1.0), ray::SHADOW);
+                    glm::dvec3 remainder =
+                        this->shadowAttenuation(shadow2, isectPt2Mod);
+                    result += atten * remainder;
+                }
+            }
+        }
+
+        return result * (1.0 / lightSamples);
+    }
+
     isect i;
     ray shadow = ray(p, getDirection(p), glm::dvec3(1, 1, 1), ray::SHADOW);
     // calculate length

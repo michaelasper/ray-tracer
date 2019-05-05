@@ -40,6 +40,10 @@ class TraceUI {
     double getAaThreshold() const { return (double)m_nAaThreshold * 0.001; }
     double getFocalD() const { return m_focalDistance; }
     double getApSize() const { return m_ApSize; }
+    double getMC() const { return m_monte_carlo; }
+    double getPathSamples() const { return m_pathSamples; }
+    double getLightRadius() const { return m_light_rad; }
+    double getLightSamples() const { return m_light_samples; }
     int getSuperSamples() const { return m_nSuperSamples; }
     int getMaxDepth() const { return m_nTreeDepth; }
     int getLeafSize() const { return m_nLeafSize; }
@@ -54,10 +58,12 @@ class TraceUI {
     bool kdSwitch() const { return m_kdTree; }
     bool shadowSw() const { return m_shadows; }
     bool smShadSw() const { return m_smoothshade; }
+    bool pathTrace() const { return m_path; }
     bool bkFaceSw() const { return m_backface; }
     bool cubeMap() const { return m_usingCubeMap && cubemap; }
     CubeMap* getCubeMap() const { return cubemap.get(); }
     void setCubeMap(CubeMap* cm);
+    void subtractDepth() { m_monte_carlo--; }
     bool internalReflection() const { return m_internalReflection; }
     bool backfaceSpecular() const { return m_backfaceSpecular; }
 
@@ -135,6 +141,14 @@ class TraceUI {
     bool m_render3d = false;
     bool m_depthOfField = false;
     bool m_toon = false;
+
+    // PATH TRACING
+
+    bool m_path = false;
+    double m_pathSamples = 20;
+    double m_monte_carlo = 2;
+    double m_light_rad = 5;
+    double m_light_samples = 100;
 
     std::unique_ptr<CubeMap> cubemap;
 
