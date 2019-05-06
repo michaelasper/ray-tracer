@@ -78,7 +78,7 @@ glm::dvec3 PointLight::shadowAttenuation(const ray& r,
         glm::dvec3 result(0.0);
         for (int s = 0; s < (int)lightSamples; ++s) {
             glm::dvec3 shadowDir = this->getDirection(p);
-            double radius = radiuss(eng);
+            double radius = dist(eng);
 
             // MAKE A RANDOM RAY
             double r1 = dist(eng);
