@@ -103,20 +103,20 @@ glm::dvec3 PointLight::shadowAttenuation(const ray& r,
 
             isect i;
             if (!scene->intersect(shadow, i)) {
-                result += glm::dvec3(1.0);
-                return result;
+                // result += glm::dvec3(1.0);
+                return glm::dvec3(1.0);
             }
 
             double i_dist = i.getT();
             double lightDist = glm::l2Norm(this->position - p);
             if (i_dist > lightDist) {
-                result += glm::dvec3(1.0);
-                return result;
+                // result += glm::dvec3(1.0);
+                return glm::dvec3(1.0);
             }
 
             if (!i.getMaterial().Trans()) {
-                result += glm::dvec3(0.0);
-                return result;
+                // result += glm::dvec3(0.0);
+                return glm::dvec3(0.0);
             }
 
             glm::dvec3 isectPt =
