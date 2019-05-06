@@ -78,7 +78,7 @@ glm::dvec3 PointLight::shadowAttenuation(const ray& r,
         glm::dvec3 result(0.0);
         for (int s = 0; s < (int)lightSamples; ++s) {
             glm::dvec3 shadowDir = this->getDirection(p);
-            double radius = dist(eng);
+            double radius = radiuss(eng);
 
             // MAKE A RANDOM RAY
             double r1 = dist(eng);
@@ -91,6 +91,11 @@ glm::dvec3 PointLight::shadowAttenuation(const ray& r,
             double y = rad * sin(theta);
 
             glm::dvec3 randomDir(x, y, sqrt(max(0.0, 1 - r1)));
+
+            // If not in hemisphere, apply householder reflector
+            if (glm::dot(randomDir, shadowDir) < 0) {
+                randomDir -= 2 * glm::dot(randomDir, shadowDir) * shadowDir;
+            }
 
             auto shift = glm::normalize(glm::cross(shadowDir, randomDir));
 
