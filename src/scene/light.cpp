@@ -78,7 +78,7 @@ glm::dvec3 PointLight::shadowAttenuation(const ray& r,
         glm::dvec3 result(0.0);
         for (int s = 0; s < (int)lightSamples; ++s) {
             glm::dvec3 shadowDir = this->getDirection(p);
-            double radius = dist(eng);
+            double radius = radiuss(eng);
 
             // MAKE A RANDOM RAY
             double r1 = dist(eng);
@@ -104,20 +104,20 @@ glm::dvec3 PointLight::shadowAttenuation(const ray& r,
             isect i;
             if (!scene->intersect(shadow, i)) {
                 result += glm::dvec3(1.0);
-                continue;
+                return result;
             }
 
             double i_dist = i.getT();
             double lightDist = glm::l2Norm(this->position - p);
             if (i_dist > lightDist) {
                 result += glm::dvec3(1.0);
-                continue;
+                return result;
             }
 
-            // if (!i.getMaterial().Trans()) {
-            //     result += glm::dvec3(0.0);
-            //     continue;
-            // }
+            if (!i.getMaterial().Trans()) {
+                result += glm::dvec3(0.0);
+                return result;
+            }
 
             glm::dvec3 isectPt =
                 shadow.getPosition() + i.getT() * shadow.getDirection();
