@@ -42,8 +42,12 @@ class RayTracer {
     bool checkRender();
     void waitRender();
 
-    void traceSetup(int w, int h);
+    // void handleThings(int i, int j) {
+    //     std::thread myThread([this]() { tracePixel(i, j); });
+    // }
 
+    void traceSetup(int w, int h);
+    void threadImage(int w, int h, int index);
     bool loadScene(const char* fn);
     bool sceneLoaded() { return scene != 0; }
 

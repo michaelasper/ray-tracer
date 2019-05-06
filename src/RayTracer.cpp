@@ -20,6 +20,7 @@
 #include <fstream>
 #include <iostream>
 #include <random>
+#include <thread>
 
 using namespace std;
 extern TraceUI* traceUI;
@@ -200,7 +201,6 @@ glm::dvec3 RayTracer::traceRay(ray& r, double thresh, int depth, int monte,
                                double& t) {
     isect i;
     glm::dvec3 colorC;
-
     if (depth < 0) return colorC = glm::dvec3(0.0, 0.0, 0.0);
 
     if (scene->intersect(r, i)) {
@@ -213,6 +213,7 @@ glm::dvec3 RayTracer::traceRay(ray& r, double thresh, int depth, int monte,
         bool inside = glm::dot(-r.getDirection(), i.getN()) < 0;
 
         if (traceUI->pathTrace()) {
+            // enableRTX(Speed::REALTIME);
             // do stuff
             if (monte > 0 && r.type() == ray::VISIBILITY) {
                 // do actual stuff
@@ -421,23 +422,33 @@ void RayTracer::traceSetup(int w, int h) {
 void RayTracer::traceImage(int w, int h) {
     // Always call traceSetup before rendering anything.
     // traceSetup(w, h);
-    // #pragma omp parallel for schedule(dynamic)
 
     traceSetup(w, h);
-    for (int i = 0; i < w; i++) {
-        for (int j = 0; j < h; j++) {
-            tracePixel(i, j);
-        }
+    std::vector<std::thread> threads;
+
+    // for (int i = 0; i < w; i++) {
+    //     for (int j = 0; j < h; j++) {
+    //         // tracePixel(i, j);
+    //         threads.push_back(std::thread(&RayTracer::tracePixel, this, i,
+    //         j));
+    //     }
+    // }
+
+    for (int i = 0; i < 100; ++i) {
+        threads.push_back(std::thread(&RayTracer::threadImage, this, w, h, i));
     }
 
-    // // YOUR CODE HERE
-    // // FIXME: Start one or more threads for ray tracing
-    // //
-    // // TIPS: Ideally, the traceImage should be executed asynchronously,
-    // //       i.e. returns IMMEDIATELY after working threads are launched.
-    // //
-    // //       An asynchronous traceImage lets the GUI update your results
-    // //       while rendering.
+    for (auto& th : threads) th.join();
+}
+
+void RayTracer::threadImage(int w, int h, int index) {
+    for (int i = 0; i < w; i++) {
+        for (int j = 0; j < h; j++) {
+            if (j % 100 == index) {
+                this->tracePixel(i, j);
+            }
+        }
+    }
 }
 
 int RayTracer::aaImage() {
