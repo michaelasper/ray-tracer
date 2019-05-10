@@ -1,8 +1,37 @@
-# Ray Tracing
+# ~Ray~ Path Tracing
 
 Michael Asper - ma53285
 Daniel Mancia - dam4754
 
+
+## Path Tracing
+
+To use path tracing, you need to supply
+
+path samples amount = w
+
+monte carlo depth = x
+
+light sampling radius (recommended for 1) = y
+
+lgith samples amount = z
+
+then do `-p "w.x.y.z"`
+
+If you incorrectly format it, the path tracing will override it with dummy
+values.
+
+The demos was done on path.ray and a lot of samples images are in
+/path\_images/
+
+Anything with ray in the file name, is not path traced.
+
+## Extra Credit
+
+We did the course evaluation on CIS
+
+
+## Old ray tracing stuff
 
 ## Completed Features
 

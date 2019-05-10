@@ -278,7 +278,8 @@ glm::dvec3 AreaLight::shadowAttenuation(const ray& r,
     shadow.setPosition(p - r.getDirection() * 1e-7);
 
     int val = 150;
-    for (int k = 0; k < val; k++) {
+    double lightSamples = traceUI->getLightSamples();
+    for (int k = 0; k < lightSamples; k++) {
         auto phi = distPhi(eng1);
         auto rad = distRadius(eng1);
 
